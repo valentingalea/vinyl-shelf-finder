@@ -1,5 +1,6 @@
 TODO: list all the parts + pic
 TODO: formating
+TODO: add all the necessary steps from the various guides, don't redirect to them
 
 Setting up SD card
 ------------------
@@ -29,4 +30,16 @@ Once this was done and I was thinking I would be able to read back the contents 
 
 According to Google searches there are 2 main options: https://www.google.co.uk/search?q=mac+os+read+linux+sd+card
 * trying your luck with fuse-ext2 which you need to manually compile
-* a commercial product from https://www.paragon-software.com/ufsdhome/extfs-mac/
+* a commercial product from https://www.paragon-software.com/ufsdhome/extfs-mac/ 
+
+I ended up using the Paragon thing - it comes with a 10 day trial. I will see what to do in the future. Just discovered this http://www.pibakery.org/index.html
+
+Headless mode
+
+I don't have any USB or HDMI adaptors for the PI so I am running it headless. There are various guides for this, the top one on Google is this: https://davidmaitland.me/2015/12/raspberry-pi-zero-headless-setup/
+
+A stupid error
+
+After I setup the Wifi & SSH according to the guide, I booted the PI, waited for a bit for the blinking light to stabilize and then.. nothing :( Couldn't connect, and the router web interface showed nothing. Tried some more pings and nmap's but still nothing
+
+I took the SD card out, inserted it back into the Mac and reinspected the WPA WiFi config (after cross-checking) with other guides. Initially I used Mac's TextEdit to write the necessary files... and on closer inspection I noticed that the quotes characted looked too "curly" - the stupid app replaced the ASCII quote character with a fancier Unicode one! Some good old `vi` editing fixed them and I was finally able to ssh connect to the Pi!
