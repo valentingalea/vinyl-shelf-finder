@@ -43,8 +43,8 @@ while tilt != new_tilt:
 	pantilthat.tilt(tilt)
 	tick()
 
-# sec; to allow the servos to move before they are auto shut donw on exit
-print "waiting"
+# sec; to allow the servos to move before they are auto shut down on exit
+print "waiting:"
 for t in range(0, 3): 
 	time.sleep(1)
 	print "."
