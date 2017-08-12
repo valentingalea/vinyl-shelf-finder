@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "description": "find LP's in shelving cabinets based on discogs.com description",
   "main": "app.js",
-  "dependencies": {},
+  "dependencies": {
+    "disconnect": "^1.2.0",    
+    "express": "^4.15.4"
+  },
   "devDependencies": {
-    "disconnect": "^1.2.0"
+    "stringify-object": "^3.2.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
