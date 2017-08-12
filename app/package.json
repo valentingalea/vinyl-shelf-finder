@@ -4,8 +4,9 @@
   "description": "find LP's in shelving cabinets based on discogs.com description",
   "main": "app.js",
   "dependencies": {
-    "disconnect": "^1.2.0",    
-    "express": "^4.15.4"
+    "disconnect": "^1.2.0",
+    "express": "^4.15.4",
+    "fuse.js": "^3.0.5"
   },
   "devDependencies": {
     "stringify-object": "^3.2.0"

@@ -1,4 +1,10 @@
+//
+// Debug
+//
 const stringifyObject = require('stringify-object');
+function pretty(data) {
+    return "<pre>" + stringifyObject(data) + "</pre>";
+}
 
 //
 // Discogs API
@@ -10,6 +16,22 @@ var my_col = new Discogs(UserAgent).user().collection();
 var json_col = [];
 var total_count = 0;
 const ALL = 0;
+
+//
+// Search
+//
+var fuseJs = require("fuse.js");
+var searcher = undefined;
+
+function init_search() {
+    console.log("Indexing...");
+    
+    var options = {
+        keys: [ 'basic_information.title', 'basic_information.artists.name' ],
+        threshold: 0.15
+    };
+    searcher = new fuseJs(json_col, options);
+}
 
 //
 // Express REST server
@@ -24,11 +46,17 @@ app.get('/', function (req, res) {
 app.get('/random', function (req, res) {
     var index = Math.round(Math.random() * total_count);
     var msg = json_col[index];
-    res.send(index + "<br/><pre>" + stringifyObject(msg) + "</pre>");
+    res.send(index + "<br/>" + pretty(msg));
+});
+
+app.get('/search', function (req, res) {
+    console.log("Search request: " + req.query.q);
+    var found = searcher.search(req.query.q);
+    res.send(pretty(found));
 });
 
 app.get('/test', function (req, res) {
-    res.send("<pre>" + stringifyObject(json_col) + "</pre>");
+    res.send(pretty(json_col));
 });
 
 //
@@ -65,6 +93,7 @@ function async_loop() {
     } else {
         console.log("done!");
 
+        init_search();
         start_server();
     }
 };
