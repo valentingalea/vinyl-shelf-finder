@@ -11,7 +11,8 @@ function pretty(data) {
 //
 var Discogs = require('disconnect').Client;
 var UserAgent = 'vinyl-shelf-finder/1.0';
-var User = 'valentingalea';
+const User = 'valentingalea';
+var db = new Discogs(UserAgent).database();
 var my_col = new Discogs(UserAgent).user().collection();
 var json_col = [];
 var total_count = 0;
@@ -55,8 +56,15 @@ app.get('/search', function (req, res) {
     res.send(pretty(found));
 });
 
-app.get('/test', function (req, res) {
+app.get('/all', function (req, res) {
     res.send(pretty(json_col));
+});
+
+app.get('/detail/:id(\\d+)', function (req, res) {
+    db.getRelease(req.params.id, function(err, data){
+        if (err) return;
+        res.send(pretty(data));
+    });
 });
 
 //
