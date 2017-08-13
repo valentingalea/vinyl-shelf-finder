@@ -18,6 +18,21 @@ var json_col = [];
 var total_count = 0;
 const ALL = 0;
 
+function send_release_to_client(entry) {
+    var html = '<li>';
+    html += '<div class="artist">'
+        + entry.basic_information.artists[0].name // TODO: cover all cases
+        + '</div>';
+    html += '<div class="title">'
+        + entry.basic_information.title
+        + '</div>';
+    html += '<div class="cover">'
+        + entry.basic_information.cover_image
+        + '</div>';        
+    html += '</li>';
+    return html;
+}
+
 //
 // Discogs requests cache 
 //
@@ -63,7 +78,13 @@ app.get('/random', function (req, res) {
 app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
     var found = searcher.search(req.query.q);
-    res.send(pretty(found));
+
+    var client_str = '';
+    for (var entry in found) {
+        client_str += send_release_to_client(found[entry]);
+    }
+
+    res.send(client_str);
 });
 
 app.get('/all', function (req, res) {

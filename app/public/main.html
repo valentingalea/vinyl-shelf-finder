@@ -16,8 +16,9 @@
           #search-bar {
             width: 100%;
           }
-          #results {
-            padding: 1em;
+          .grid {
+            padding-left: 1em;
+            padding-right: 1em;
           }
         </style>
     </head>
@@ -27,14 +28,16 @@
             <input type="text" id="search-bar" placeholder="..."/>
         </div>
 
-        <div id="results"></div>
+        <ul class="grid">
+          <div id="results"></div>
+        </ul>
 
         <script>
             $('#search-bar').searchbox({
               url: '/search',
               param: 'q',
               dom_id: '#results',
-              delay: 1000
+              delay: 250
             });
           </script>
     </body>
