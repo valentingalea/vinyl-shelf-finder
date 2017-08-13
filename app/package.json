@@ -6,6 +6,7 @@
   "dependencies": {
     "disconnect": "^1.2.0",
     "express": "^4.15.4",
+    "flat-cache": "^1.2.2",
     "fuse.js": "^3.0.5"
   },
   "devDependencies": {

@@ -19,6 +19,14 @@ var total_count = 0;
 const ALL = 0;
 
 //
+// Discogs requests cache 
+//
+console.log("Loading cache...");
+var flatCache = require('flat-cache');
+const cache_file = 'discogs';
+var cache = flatCache.load(cache_file, __dirname + '/cache/');
+
+//
 // Search
 //
 var fuseJs = require("fuse.js");
@@ -81,7 +89,17 @@ var page_count = 0;
 var page_iter = 1;
 
 function get_page(n) {
-    return my_col.getReleases(User, ALL, { page: n, per_page: page_items });
+    if (typeof cache.getKey(n) === "undefined") {
+        process.stdout.write('Downloading page ' + n + '...');
+        
+        return my_col.getReleases(User, ALL, { page: n, per_page: page_items });
+    } else {
+        process.stdout.write('Readback cached page ' + n + '...');
+
+        return new Promise(function (resolve, reject) {
+            return resolve(cache.getKey(n));
+        });
+    }
 }
 
 function start_server(){
@@ -94,15 +112,23 @@ function start_server(){
 function async_loop() {
     if (page_iter <= page_count) {
         return get_page(page_iter).then(function (data) {
+            console.log("done");
+
+            var old_data = cache.getKey(page_iter);
+            if (typeof old_data === "undefined") {
+                cache.setKey(page_iter, data);
+                cache.save({noPrune: true});
+                console.log("Cached page " + page_iter);
+            }
+
             json_col = json_col.concat(data.releases);
-            console.log(".");
             
             page_iter++;
             async_loop();
+        }, function (err) {
+            console.log(err);
         });
     } else {
-        console.log("done!");
-
         init_search();
         start_server();
     }
@@ -114,6 +140,17 @@ get_folder
     total_count = data.count;
     page_count = Math.round(data.count / page_items);
     console.log("Found " + total_count + " records, retrieving all in " + page_count + " steps...");
+
+    var old_count = cache.getKey('count');
+    if (old_count != total_count) {
+        console.log("Cache invalidated!");
+
+        flatCache.clearCacheById(cache_file);
+        cache.setKey('count', total_count);
+        cache.save({noPrune: true});
+    }
     
     async_loop();
+}, function(err) {
+    console.log(err);
 });
