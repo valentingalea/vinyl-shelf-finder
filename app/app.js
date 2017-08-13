@@ -39,9 +39,11 @@ function init_search() {
 //
 var express = require('express');
 var app = express();
+app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
-    res.send(UserAgent);
+    //res.send(UserAgent);
+    res.sendFile('main.html', { root: __dirname + '/public/' }); 
 });
 
 app.get('/random', function (req, res) {

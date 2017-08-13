@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <script
+          src="https://code.jquery.com/jquery-3.2.1.min.js"
+          integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+          crossorigin="anonymous"></script>
+        <script src="searchbox.js"></script>
+
+        <style>
+          #search-area {
+            padding: 1em;
+          }
+          #search-bar {
+            width: 100%;
+          }
+          #results {
+            padding: 1em;
+          }
+        </style>
+    </head>
+
+    </body>
+        <div id="search-area">
+            <input type="text" id="search-bar" placeholder="..."/>
+        </div>
+
+        <div id="results"></div>
+
+        <script>
+            $('#search-bar').searchbox({
+              url: '/search',
+              param: 'q',
+              dom_id: '#results',
+              delay: 1000
+            });
+          </script>
+    </body>
+</html>
