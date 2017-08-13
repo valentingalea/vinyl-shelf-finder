@@ -18,21 +18,6 @@ var json_col = [];
 var total_count = 0;
 const ALL = 0;
 
-function send_release_to_client(entry) {
-    var html = '<li>';
-    html += '<div class="artist">'
-        + entry.basic_information.artists[0].name // TODO: cover all cases
-        + '</div>';
-    html += '<div class="title">'
-        + entry.basic_information.title
-        + '</div>';
-    html += '<div class="cover">'
-        + entry.basic_information.cover_image
-        + '</div>';        
-    html += '</li>';
-    return html;
-}
-
 //
 // Discogs requests cache 
 //
@@ -79,10 +64,26 @@ app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
     var found = searcher.search(req.query.q);
 
-    var client_str = '';
+    var send_release_to_client = function (entry) {
+        var html = '<li>';
+        html += '<div class="artist">'
+            + entry.basic_information.artists[0].name // TODO: cover all cases
+            + '</div>';
+        html += '<div class="title">'
+            + entry.basic_information.title
+            + '</div>';
+        html += '<img class="cover" src="generic.png" width="300" height="300" data-original="'
+            + entry.basic_information.cover_image
+            + '">';
+        html += '</li>';
+        return html;
+    };
+
+    var client_str = '<ul class="grid">';
     for (var entry in found) {
         client_str += send_release_to_client(found[entry]);
     }
+    client_str += "</ul><script>$('.cover').lazyload();</script>";
 
     res.send(client_str);
 });

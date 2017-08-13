@@ -3,11 +3,13 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+
         <script
           src="https://code.jquery.com/jquery-3.2.1.min.js"
           integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
           crossorigin="anonymous"></script>
         <script src="searchbox.js"></script>
+        <script src="jquery.lazyload.min.js"></script>
 
         <style>
           #search-area {
@@ -28,9 +30,7 @@
             <input type="text" id="search-bar" placeholder="..."/>
         </div>
 
-        <ul class="grid">
-          <div id="results"></div>
-        </ul>
+        <div id="results"></div>
 
         <script>
             $('#search-bar').searchbox({
@@ -38,6 +38,12 @@
               param: 'q',
               dom_id: '#results',
               delay: 250
+            });
+
+            echo.init({
+              offset: 100,
+              throttle: 250,
+              unload: false,
             });
           </script>
     </body>
