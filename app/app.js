@@ -10,13 +10,13 @@ function pretty(data) {
 // Discogs API
 //
 var Discogs = require('disconnect').Client;
-var UserAgent = 'vinyl-shelf-finder/1.0';
+const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
+const ALL = 0; // id of main folder
 var db = new Discogs(UserAgent).database();
 var my_col = new Discogs(UserAgent).user().collection();
 var json_col = [];
 var total_count = 0;
-const ALL = 0;
 
 //
 // Discogs requests cache 
