@@ -50,8 +50,7 @@ var app = express();
 app.use(express.static(__dirname + '/public'));
 
 app.get('/', function (req, res) {
-    //res.send(UserAgent);
-    res.sendFile('main.html', { root: __dirname + '/public/' }); 
+    res.sendFile('index.html', { root: __dirname + '/public/' }); 
 });
 
 app.get('/random', function (req, res) {
@@ -65,31 +64,39 @@ app.get('/search', function (req, res) {
     var found = searcher.search(req.query.q);
 
     var send_release_to_client = function (entry) {
-        var html = '<li>';
-        html += '<div class="artist">'
-            + entry.basic_information.artists[0].name // TODO: cover all cases
-            + '</div>';
-        html += '<div class="title">'
-            + entry.basic_information.title
-            + '</div>';
-        html += '<img class="cover" src="generic.png" width="300" height="300" data-original="'
-            + entry.basic_information.cover_image
-            + '">';
-        html += '</li>';
+        var html =
+        // TODO: unhardcore artist
+        // TODO: cut long names with ...
+        `<div class="card">
+            <img class="card-img-top" data-src="holder.js/300x300/thumb" data-original="${entry.basic_information.cover_image}">
+            <div class="card-body">
+                <h5>${entry.basic_information.title}</h5>
+                <h6>${entry.basic_information.artists[0].name}</h6>
+                <a href="#" class="btn btn-outline-primary">Find</a>
+                <a href="#" class="btn btn-outline-primary">Play</a>
+            </div>
+        </div>`;
         return html;
     };
 
-    var client_str = '<ul class="grid">';
-    for (var entry in found) {
-        client_str += send_release_to_client(found[entry]);
+    var client_str = '';
+    for (var i = 0; i < found.length; i++) {
+        client_str += send_release_to_client(found[i]);
+
+        // cut short to not overload with request
+        // TODO: pagination support
+        if (i > 10) break;
     }
-    client_str += "</ul><script>$('.cover').lazyload();</script>";
 
     res.send(client_str);
 });
 
 app.get('/all', function (req, res) {
     res.send(pretty(json_col));
+});
+
+app.get('/test', function (req, res) {
+    res.send(UserAgent);
 });
 
 app.get('/detail/:id(\\d+)', function (req, res) {

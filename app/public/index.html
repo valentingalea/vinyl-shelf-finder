@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <title>Vinyl Shelf Finder</title>
+
+    <!-- Bootstrap core CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <!-- Custom styles for this template -->
+    <style>
+      .navbar {
+        margin-bottom: 0;
+      }
+
+      .jumbotron {
+        padding-top: 2rem;
+        padding-bottom: 2rem;
+        margin-bottom: 0;
+        background-color: #EDEDED;
+      }
+
+      .jumbotron p:last-child {
+        margin-bottom: 0;
+      }
+
+      .jumbotron-heading {
+        font-weight: 300;
+      }
+
+      .jumbotron .container {
+        max-width: 40rem;
+      }
+
+      .album {
+        padding-top: 3rem;
+        padding-bottom: 3rem;
+        background-color: #f7f7f7;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      .card-img-top {
+        width: 300px;
+        height: 300px;
+      }
+    </style>
+  </head>
+
+  <body>
+
+    <div class="collapse bg-dark" id="navbarHeader">
+      <div class="container">
+        <div class="row">
+          <div class="col-sm-12">
+            <h4 class="text-white">About</h4>
+            <p class="text-muted">https://github.com/valentingalea/vinyl-shelf-finder</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="navbar navbar-dark bg-dark">
+      <div class="container d-flex justify-content-between">
+        <a href="#" class="navbar-brand">Vinyl Shelf Finder</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+      </div>
+    </div>
+
+    <section class="jumbotron text-center">
+      <div class="container">
+        <div class="form-group">
+            <input id="search-bar" class="form-control" type="text" placeholder="Search" aria-label="Search">
+        </div>
+    </section>
+
+    <div class="album text-muted">
+      <div class="container-fluid">
+
+        <div id="results" class="row">
+          <div class="card">
+            <img class="card-img-top" data-src="holder.js/300x300/thumb">
+            <div class="card-body">
+              <h5>Title</h5>
+              <h6>Artist</h6>
+              <a href="#" class="btn btn-outline-primary">Find</a>
+              <a href="#" class="btn btn-outline-primary">Play</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js" integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/holder/2.9.4/holder.min.js"></script>
+    <script>
+      $(function () {
+        Holder.addTheme("thumb", { background: "#55595c", foreground: "#eceeef", text: "Thumbnail" });
+      });
+    </script>
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+
+    <script src="jquery.lazyload.min.js"></script>
+
+    <script>
+      $('#search-bar').keyup(function(e) {
+        var key = e.which || e.keyCode;
+        if(key == 13) {
+          $.get("/search?q=" + $(this).val(), function (data) {
+            $("#results").html(data);
+            $('.card-img-top').lazyload({skip_invisible:false});
+          });
+        }
+      });
+    </script>
+  </body>
+</html>
