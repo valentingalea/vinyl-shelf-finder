@@ -1,3 +1,5 @@
+// TODO: expose all the config stuff in one place
+
 //
 // Debug
 //
@@ -64,11 +66,15 @@ app.get('/search', function (req, res) {
     var found = searcher.search(req.query.q);
 
     var send_release_to_client = function (entry) {
+		const size = "150";
+		
         var html =
         // TODO: unhardcore artist
         // TODO: cut long names with ...
         `<div class="card">
-            <img class="card-img-top" data-src="holder.js/300x300/thumb" data-original="${entry.basic_information.cover_image}">
+            <img class="card-img-top"
+				style="width: ${size}px; height: ${size}px;"
+				data-src="holder.js/${size}x${size}/thumb" data-original="${entry.basic_information.cover_image}">
             <div class="card-body">
                 <h5>${entry.basic_information.title}</h5>
                 <h6>${entry.basic_information.artists[0].name}</h6>
@@ -149,6 +155,9 @@ function async_loop() {
                 cache.save({noPrune: true});
                 console.log("Cached page " + page_iter);
             }
+			
+			// TODO: async cache the cover img here
+			// TODO: also resize img
 
             json_col = json_col.concat(data.releases);
             
