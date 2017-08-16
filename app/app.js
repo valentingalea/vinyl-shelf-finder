@@ -66,15 +66,16 @@ app.get('/', function (req, res) {
     res.sendFile('index.html', { root: get_pub_dir() }); 
 });
 
-app.get('/random', function (req, res) {
-    var index = Math.round(Math.random() * total_count);
-    var msg = json_col[index];
-    res.send(index + "<br/>" + pretty(msg));
-});
-
 app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
-    var found = searcher.search(req.query.q);
+
+    var found = undefined;
+    if (!req.query.q || req.query.q === "") {
+        var index = Math.round(Math.random() * total_count);
+        found = [ json_col[index] ];
+    } else {
+        found = searcher.search(req.query.q);
+    }
 
     const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
 
