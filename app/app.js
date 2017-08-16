@@ -49,10 +49,16 @@ function init_search() {
 //
 var express = require('express');
 var app = express();
-app.use(express.static(__dirname + '/public'));
+
+function get_pub_dir() {
+    return __dirname + '/public/';
+}
+app.use(express.static(get_pub_dir()));
+
+var fs = require('fs');
 
 app.get('/', function (req, res) {
-    res.sendFile('index.html', { root: __dirname + '/public/' }); 
+    res.sendFile('index.html', { root: get_pub_dir() }); 
 });
 
 app.get('/random', function (req, res) {
@@ -65,29 +71,23 @@ app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
     var found = searcher.search(req.query.q);
 
-    var send_release_to_client = function (entry) {
-		const size = "150";
-		
-        var html =
-        // TODO: unhardcore artist
-        // TODO: cut long names with ...
-        `<div class="card">
-            <img class="card-img-top"
-				style="width: ${size}px; height: ${size}px;"
-				data-src="holder.js/${size}x${size}/thumb" data-original="${entry.basic_information.cover_image}">
-            <div class="card-body">
-                <h5>${entry.basic_information.title}</h5>
-                <h6>${entry.basic_information.artists[0].name}</h6>
-                <a href="#" class="btn btn-outline-primary">Find</a>
-                <a href="#" class="btn btn-outline-primary">Play</a>
-            </div>
-        </div>`;
+    const size = "150";
+    const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
+
+    var send_release_to_client = function (input, entry) {
+        var html = input;
+
+        html = html.replace("${size}", size);
+        html = html.replace('${entry.title}', entry.basic_information.title);
+        html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
+        html = html.replace("${entry.cover}", entry.basic_information.cover_image);
+
         return html;
     };
 
-    var client_str = '';
+    var client_str = "";
     for (var i = 0; i < found.length; i++) {
-        client_str += send_release_to_client(found[i]);
+        client_str += send_release_to_client(templ_file, found[i]);
 
         // cut short to not overload with request
         // TODO: pagination support
