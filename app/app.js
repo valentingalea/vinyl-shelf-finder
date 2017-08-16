@@ -1,4 +1,12 @@
-// TODO: expose all the config stuff in one place
+//
+// Config
+//
+const UserAgent = 'vinyl-shelf-finder/1.0';
+const User = 'valentingalea';
+const ALL = 0; // id of main folder
+const thumb_size = "150";
+const max_results = 10;
+const port = 8080;
 
 //
 // Debug
@@ -12,9 +20,6 @@ function pretty(data) {
 // Discogs API
 //
 var Discogs = require('disconnect').Client;
-const UserAgent = 'vinyl-shelf-finder/1.0';
-const User = 'valentingalea';
-const ALL = 0; // id of main folder
 var db = new Discogs(UserAgent).database();
 var my_col = new Discogs(UserAgent).user().collection();
 var json_col = [];
@@ -71,13 +76,12 @@ app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
     var found = searcher.search(req.query.q);
 
-    const size = "150";
     const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
 
     var send_release_to_client = function (input, entry) {
         var html = input;
 
-        html = html.replace("${size}", size);
+        html = html.replace("${size}", thumb_size);
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
@@ -89,9 +93,9 @@ app.get('/search', function (req, res) {
     for (var i = 0; i < found.length; i++) {
         client_str += send_release_to_client(templ_file, found[i]);
 
-        // cut short to not overload with request
+        // cut short to not overload with requests
         // TODO: pagination support
-        if (i > 10) break;
+        if (i > max_results) break;
     }
 
     res.send(client_str);
@@ -119,7 +123,7 @@ console.log("Starting...");
 
 var get_folder = my_col.getFolder(User, ALL);
 
-const page_items = 100;
+const page_items = 100; // max API limit is 100
 var page_count = 0;
 var page_iter = 1;
 
@@ -138,7 +142,6 @@ function get_page(n) {
 }
 
 function start_server(){
-    const port = 8080;
     app.listen(port, function () {
         console.log('Listening on ' + port + '...');
     }); 
