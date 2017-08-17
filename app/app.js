@@ -66,6 +66,9 @@ app.use(express.static(get_pub_dir()));
 var fs = require('fs');
 var request = require('request');
 
+// always have this ready
+const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
+
 app.get('/', function (req, res) {
     res.sendFile('index.html', { root: get_pub_dir() }); 
 });
@@ -80,8 +83,6 @@ app.get('/search', function (req, res) {
     } else {
         found = searcher.search(req.query.q);
     }
-
-    const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
 
     var send_release_to_client = function (input, entry) {
         var html = input;
