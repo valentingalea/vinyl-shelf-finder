@@ -4,7 +4,7 @@
 const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
 const ALL = 0; // id of main folder
-const thumb_size = "150";
+const thumb_size = 150;
 const max_results = 10;
 const port = 8080;
 
@@ -31,7 +31,10 @@ var total_count = 0;
 console.log("Loading cache...");
 var flatCache = require('flat-cache');
 const cache_file = 'discogs';
-var cache = flatCache.load(cache_file, __dirname + '/cache/');
+function get_cache_dir() {
+    return __dirname + '/cache/';
+}
+var cache = flatCache.load(cache_file, get_cache_dir());
 
 //
 // Search
@@ -61,6 +64,7 @@ function get_pub_dir() {
 app.use(express.static(get_pub_dir()));
 
 var fs = require('fs');
+var request = require('request');
 
 app.get('/', function (req, res) {
     res.sendFile('index.html', { root: get_pub_dir() }); 
@@ -90,8 +94,30 @@ app.get('/search', function (req, res) {
         return html;
     };
 
+    var prepare_cover_img = function (entry) {
+        var id = entry.id;
+
+        var img_local = "img_cache/" + id + ".jpg";
+        var img_file_name = get_pub_dir() + img_local;
+
+        if (fs.existsSync(img_file_name)) {
+            entry.basic_information.cover_image = img_local;
+        } else {
+            console.log("Caching cover image for release " + id + "...");
+            var options = {
+                url: entry.basic_information.cover_image,
+                headers: {
+                    'User-Agent': UserAgent
+                }
+            };
+            request(options).pipe(fs.createWriteStream(img_file_name));               
+        };
+    };
+
     var client_str = "";
     for (var i = 0; i < found.length; i++) {
+        prepare_cover_img(found[i]);
+
         client_str += send_release_to_client(templ_file, found[i]);
 
         // cut short to not overload with requests
@@ -159,9 +185,6 @@ function async_loop() {
                 cache.save({noPrune: true});
                 console.log("Cached page " + page_iter);
             }
-			
-			// TODO: async cache the cover img here
-			// TODO: also resize img
 
             json_col = json_col.concat(data.releases);
             
