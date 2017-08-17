@@ -91,6 +91,7 @@ app.get('/search', function (req, res) {
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
+        html = html.replace("${btn.find}", "https://www.discogs.com/release/" + entry.id);
 
         return html;
     };
