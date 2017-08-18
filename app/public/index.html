@@ -75,7 +75,7 @@
     <section class="jumbotron text-center">
       <div class="container">
         <div class="form-group">
-            <input id="search-bar" class="form-control" type="text" placeholder="Search" aria-label="Search">
+            <input id="_srchz_b0x" autocomplete="off" class="form-control" type="text" placeholder="Search" aria-label="Search">
         </div>
     </section>
 
@@ -102,7 +102,7 @@
     <script src="jquery.lazyload.min.js"></script>
 
     <script>
-      $('#search-bar').keyup(function(e) {
+      $('#_srchz_b0x').keyup(function(e) {
         var key = e.which || e.keyCode;
         if(key == 13) {
           $.get("/search?q=" + $(this).val(), function (data) {
