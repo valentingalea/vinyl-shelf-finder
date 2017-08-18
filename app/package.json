@@ -7,7 +7,8 @@
     "disconnect": "^1.2.0",
     "express": "^4.15.4",
     "flat-cache": "^1.2.2",
-    "fuse.js": "^3.0.5"
+    "fuse.js": "^3.0.5",
+    "request": "^2.81.0"
   },
   "devDependencies": {
     "stringify-object": "^3.2.0"
