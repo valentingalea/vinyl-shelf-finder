@@ -149,10 +149,31 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 app.get('/play/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
         if (err) return;
-        var tracks = data.tracklist;
-        var artist = data.artists[0].name;
-        var album = data.title;
-        res.send(pretty(tracks));
+
+        var main_artist = data.artists[0].name;
+        var main_album = data.title;
+        var track_data = data.tracklist;
+
+        var tracklist = [];
+        for (var i = 0; i < track_data.length; i++) {
+            var t = track_data[i];
+            if ((t.position === '') || (t.type_ != 'track')) continue;
+
+            // https://www.last.fm/api/show/track.scrobble
+            var track_scrobble = {
+                artist: (typeof t.artists === "undefined" ? 
+                    main_artist :
+                    t.artists[0].name),
+                track: t.title,
+                timestamp: 0,
+                album: main_album,
+                trackNumber: t.position
+            };
+
+            tracklist.push(track_scrobble);
+        }
+
+        res.send(pretty(tracklist));
     });
 });
 
