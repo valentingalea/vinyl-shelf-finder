@@ -92,6 +92,7 @@ app.get('/search', function (req, res) {
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
         html = html.replace("${btn.find}", "https://www.discogs.com/release/" + entry.id);
+        html = html.replace("${btn.play}", entry.id);
 
         return html;
     };
@@ -142,6 +143,16 @@ app.get('/detail/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
         if (err) return;
         res.send(pretty(data));
+    });
+});
+
+app.get('/play/:id(\\d+)', function (req, res) {
+    db.getRelease(req.params.id, function(err, data){
+        if (err) return;
+        var tracks = data.tracklist;
+        var artist = data.artists[0].name;
+        var album = data.title;
+        res.send(pretty(tracks));
     });
 });
 
