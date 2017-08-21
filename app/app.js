@@ -113,7 +113,11 @@ app.get('/search', function (req, res) {
                     'User-Agent': UserAgent
                 }
             };
-            request(options).pipe(fs.createWriteStream(img_file_name));               
+            try {
+                equest(options).pipe(fs.createWriteStream(img_file_name));   
+            } catch (err) {
+                console.log("Download failed: " + err);
+            }            
         };
     };
 
@@ -148,7 +152,10 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 
 app.get('/play/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
-        if (err) return;
+        if (err) {
+            res.send(err);
+            return;
+        }
 
         var main_artist = data.artists[0].name;
         var main_album = data.title;
@@ -225,7 +232,7 @@ function async_loop() {
             page_iter++;
             async_loop();
         }, function (err) {
-            console.log(err);
+            console.log("During async_loop: " + err);
         });
     } else {
         init_search();
@@ -233,23 +240,44 @@ function async_loop() {
     }
 };
 
+function get_cached_count() {
+    var old_count = cache.getKey('count');
+    if (typeof old_count === "undefined") {
+        return 0;
+    } else {
+        return old_count;
+    }
+}
+
+function start_loading() {
+    page_count = Math.round(total_count / page_items);
+    console.log("Found " + total_count + " records, retrieving all in " + page_count + " steps...");
+    async_loop();
+}
+
 // build the collection & then start server
 get_folder
 .then(function (data){  
     total_count = data.count;
-    page_count = Math.round(data.count / page_items);
-    console.log("Found " + total_count + " records, retrieving all in " + page_count + " steps...");
-
-    var old_count = cache.getKey('count');
+    var old_count = get_cached_count();
     if (old_count != total_count) {
         console.log("Cache invalidated!");
 
         flatCache.clearCacheById(cache_file);
+        //TODO: this is not ideal as it can corrupt the cache
+        // if the later retrievals fail
         cache.setKey('count', total_count);
         cache.save({noPrune: true});
     }
     
-    async_loop();
+    start_loading();
 }, function(err) {
-    console.log(err);
+    console.log("discogs.getFolder failed: " + err);
+
+    if (get_cached_count() > 0) {
+        console.log("Offline mode!");
+
+        total_count = get_cached_count();
+        start_loading();
+    }
 });
