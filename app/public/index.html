@@ -135,9 +135,13 @@
         }
       });
 
-      $('#play_dlg').on('shown.bs.modal', function (e) {
-        //var id = e.relatedTarget; //.data('id')
-        $('.modal-body').html('TODO:');
+      $('#play_dlg').on('show.bs.modal', function (e) {
+        var id = $(e.relatedTarget).data('id');
+        $('.modal-body').html("Loading " + id + "...");
+
+        $.get("/play/" + id, function (data) {
+            $('.modal-body').html(data);
+        });
       });
     </script>
   </body>

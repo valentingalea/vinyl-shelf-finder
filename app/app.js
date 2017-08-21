@@ -145,7 +145,10 @@ app.get('/test', function (req, res) {
 
 app.get('/detail/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
-        if (err) return;
+        if (err) {
+            es.send(pretty(err));
+            return;
+        }
         res.send(pretty(data));
     });
 });
@@ -153,7 +156,7 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 app.get('/play/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
         if (err) {
-            res.send(err);
+            res.send(pretty(err));
             return;
         }
 
