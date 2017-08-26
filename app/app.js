@@ -194,8 +194,16 @@ app.get('/all', function (req, res) {
     res.send(pretty(json_col));
 });
 
-app.get('/test', function (req, res) {
-    res.send(UserAgent);
+app.get('/info', function (req, res) {
+    const os = require('os');
+    var info = {
+        client: UserAgent,
+        uptime: os.uptime(),
+        cpu: os.cpus(),
+        archicture: os.arch(),
+        type: os.type()
+    };
+    res.send(pretty(info));
 });
 
 app.get('/detail/:id(\\d+)', function (req, res) {
