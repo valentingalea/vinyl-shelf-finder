@@ -163,11 +163,24 @@ app.get('/play/:id(\\d+)', function (req, res) {
             return;
         }
 
+        // from https://stackoverflow.com/a/17098372/5760
+        var parse_duration = function (str) {
+            var parts = str.match(/^(\d*:)?(\d*)$/);
+            if (parts) {
+                var min = parseInt(parts[1], 10) || 0;
+                var sec = parseInt(parts[2], 10) || 0;
+                return min * 60 + sec;
+            } else {
+                return 0;
+            }
+        };        
+
         var main_artist = data.artists[0].name;
         var main_album = data.title;
         var track_data = data.tracklist;
 
         var tracklist = [];
+        var play_time = Math.floor(Date.now() / 1000);
         for (var i = 0; i < track_data.length; i++) {
             var t = track_data[i];
             if ((t.position === '') || (t.type_ != 'track')) continue;
@@ -178,15 +191,52 @@ app.get('/play/:id(\\d+)', function (req, res) {
                     main_artist :
                     t.artists[0].name),
                 track: t.title,
-                timestamp: 0,
+                timestamp: play_time,
                 album: main_album,
                 trackNumber: t.position
             };
 
+            play_time += parse_duration(t.duration);
             tracklist.push(track_scrobble);
         }
 
-        res.send(pretty(tracklist));
+        var side = function (S) {
+            return tracklist.filter(function (i) { 
+                return i.trackNumber.indexOf(S) >= 0;
+            });
+        };
+        var radio_data = [ 
+            { label: 'All tracks', data: tracklist, value: '*' },
+            { label: 'Side A', data: side('A'), value: 'A' },
+            { label: 'Side B', data: side('B'), value: 'B' },
+            { label: 'Side C', data: side('C'), value: 'C' },
+            { label: 'Side D', data: side('D'), value: 'D' },
+            { label: 'Track...', data: [{}], value: '?'}
+        ];
+
+        var client_str = '<div class="btn-group" data-toggle="buttons">';
+        var radio_item = function (label, value, is_selected) {
+            var active = is_selected ? 'active' : '';
+            var checked = is_selected ? 'checked' : '';
+            return `<label class="btn btn-secondary ${active}">
+                 <input type="radio" value="${value} ${checked}" autocomplete="off">${label}
+            </label>`;
+        };
+        for (var i = 0; i < radio_data.length; i++) {
+            var s = radio_data[i];
+            if (s.data.length > 0) {
+                client_str += radio_item(s.label, s.value, i === 0);
+            }
+        }
+        client_str += '</div>';
+
+        client_str += '<br><br><ol class="list-group">';
+        for (var i = 0; i < tracklist.length; i++) {
+            client_str += `<li class="list-group-item">${tracklist[i].track}</li>`;
+        }
+        client_str += '<ol>';
+
+        res.send(client_str);
     });
 });
 
