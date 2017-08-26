@@ -34,7 +34,10 @@ const cache_file = 'discogs';
 function get_cache_dir() {
     return __dirname + '/cache/';
 }
-var cache = flatCache.load(cache_file, get_cache_dir());
+function init_cache() {
+    return flatCache.load(cache_file, get_cache_dir());
+}
+var cache = init_cache();
 
 //
 // Search
@@ -266,7 +269,8 @@ get_folder
     if (old_count != total_count) {
         console.log("Cache invalidated!");
 
-        flatCache.clearCacheById(cache_file);
+        cache.destroy();
+        cache = init_cache();
         //TODO: this is not ideal as it can corrupt the cache
         // if the later retrievals fail
         cache.setKey('count', total_count);
