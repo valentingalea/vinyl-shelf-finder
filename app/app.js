@@ -114,7 +114,7 @@ app.get('/search', function (req, res) {
                 }
             };
             try {
-                equest(options).pipe(fs.createWriteStream(img_file_name));   
+                request(options).pipe(fs.createWriteStream(img_file_name));   
             } catch (err) {
                 console.log("Download failed: " + err);
             }            
