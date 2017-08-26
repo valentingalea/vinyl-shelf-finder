@@ -20,7 +20,7 @@ const os = require('os');
 function running_on_pi() {
     // very hacky way to determine
     // better: https://github.com/fourcube/detect-rpi
-    return os.arch === 'arm';
+    return os.arch() === 'arm';
 }
 
 //
