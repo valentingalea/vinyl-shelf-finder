@@ -40,6 +40,35 @@ function init_cache() {
 var cache = init_cache();
 
 //
+// image download cache
+//
+var fs = require('fs');
+var request = require('request');
+function prepare_cover_img(entry) {
+    var id = entry.id;
+
+    var img_local = "img_cache/" + id + ".jpg";
+    var img_file_name = get_pub_dir() + img_local;
+
+    if (fs.existsSync(img_file_name)) {
+        entry.basic_information.cover_image = img_local;
+    } else {
+        console.log("Caching cover image for release " + id + "...");
+        var options = {
+            url: entry.basic_information.cover_image,
+            headers: {
+                'User-Agent': UserAgent
+            }
+        };
+        try {
+            request(options).pipe(fs.createWriteStream(img_file_name));   
+        } catch (err) {
+            console.log("Download failed: " + err);
+        }            
+    };
+};
+
+//
 // Search
 //
 var fuseJs = require("fuse.js");
@@ -66,9 +95,6 @@ function get_pub_dir() {
 }
 app.use(express.static(get_pub_dir()));
 
-var fs = require('fs');
-var request = require('request');
-
 // always have this ready
 const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
 
@@ -81,11 +107,11 @@ app.get('/search', function (req, res) {
 
     var found = [];
     if (!req.query.q || req.query.q === "") {
-        // if not search string, get a random one
+    // if not search string, get a random one
         var index = Math.round(Math.random() * total_count);
         found = [ json_col[index] ];
     } else {
-        // special search commands
+    // special search commands
         if (req.query.q.indexOf('shelf:') > -1 || req.query.q.indexOf('s:') > -1) {
             var shelf_id = req.query.q.split(':')[1];
  
@@ -114,7 +140,7 @@ app.get('/search', function (req, res) {
                 return parseInt(_a.value) - parseInt(_b.value);
             });
         } else {
-            // normal string search
+    // normal string search
             found = searcher.search(req.query.q);
         }
     }
@@ -128,30 +154,6 @@ app.get('/search', function (req, res) {
         html = html.replace("${btn.find}", "https://www.discogs.com/release/" + entry.id);
         html = html.replace("${btn.play}", entry.id);
         return html;
-    };
-
-    var prepare_cover_img = function (entry) {
-        var id = entry.id;
-
-        var img_local = "img_cache/" + id + ".jpg";
-        var img_file_name = get_pub_dir() + img_local;
-
-        if (fs.existsSync(img_file_name)) {
-            entry.basic_information.cover_image = img_local;
-        } else {
-            console.log("Caching cover image for release " + id + "...");
-            var options = {
-                url: entry.basic_information.cover_image,
-                headers: {
-                    'User-Agent': UserAgent
-                }
-            };
-            try {
-                request(options).pipe(fs.createWriteStream(img_file_name));   
-            } catch (err) {
-                console.log("Download failed: " + err);
-            }            
-        };
     };
 
     var client_str = "";
