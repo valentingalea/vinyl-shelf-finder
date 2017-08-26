@@ -44,27 +44,42 @@ var cache = init_cache();
 //
 var fs = require('fs');
 var request = require('request');
-function prepare_cover_img(entry) {
-    var id = entry.id;
+var tress = require('tress');
 
+function download_img_task(job, done) {
+    try {
+        var stream = request(job.src).pipe(fs.createWriteStream(job.dest));   
+        stream.on('finish', function() {
+            console.log("Cached cover image for release " + job.id + "...");
+            done(undefined);
+        });
+    } catch (err) {
+        console.log("Download failed: " + err);
+        done(err);
+    } 
+};
+var img_queue = tress(download_img_task, 8/*concurency*/);
+
+function prepare_cover_img(entry, cache_todo) {
+    var id = entry.id;
     var img_local = "img_cache/" + id + ".jpg";
     var img_file_name = get_pub_dir() + img_local;
 
     if (fs.existsSync(img_file_name)) {
         entry.basic_information.cover_image = img_local;
     } else {
-        console.log("Caching cover image for release " + id + "...");
-        var options = {
+        var download_req = {
             url: entry.basic_information.cover_image,
             headers: {
                 'User-Agent': UserAgent
             }
         };
-        try {
-            request(options).pipe(fs.createWriteStream(img_file_name));   
-        } catch (err) {
-            console.log("Download failed: " + err);
-        }            
+        var job = {
+            id: entry.id,
+            src: download_req,
+            dest: img_file_name
+        };
+        cache_todo.push(job);
     };
 };
 
@@ -157,8 +172,9 @@ app.get('/search', function (req, res) {
     };
 
     var client_str = "";
+    var img_dl_todo = [];
     for (var i = 0; i < found.length; i++) {
-        prepare_cover_img(found[i]);
+        prepare_cover_img(found[i], img_dl_todo);
 
         client_str += send_release_to_client(templ_file, found[i]);
 
@@ -166,6 +182,10 @@ app.get('/search', function (req, res) {
         // TODO: pagination support
         if (i > max_results) break;
     }
+
+    // request new cover images to be downloaded
+    // bubble them up to the front of the queue
+    img_queue.unshift(img_dl_todo);
 
     res.send(client_str);
 });
