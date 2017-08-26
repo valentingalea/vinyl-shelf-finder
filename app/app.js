@@ -79,24 +79,54 @@ app.get('/', function (req, res) {
 app.get('/search', function (req, res) {
     console.log("Search request: " + req.query.q);
 
-    var found = undefined;
+    var found = [];
     if (!req.query.q || req.query.q === "") {
+        // if not search string, get a random one
         var index = Math.round(Math.random() * total_count);
         found = [ json_col[index] ];
     } else {
-        found = searcher.search(req.query.q);
+        // special search commands
+        if (req.query.q.indexOf('shelf:') > -1 || req.query.q.indexOf('s:') > -1) {
+            var shelf_id = req.query.q.split(':')[1];
+ 
+            for (var i = 0; i < json_col.length; i++) {
+                var entry = json_col[i];
+                if (typeof entry.notes === 'undefined') {
+                    console.log(`Warning: found entry with no shelf info: ${entry.id} (${entry.basic_information.title})`);
+                    continue;
+                }
+
+                var id_def = entry.notes.filter(function (n) { return n.field_id == 3; });
+                if (id_def.length > 0) {
+                    var id = parseInt(id_def[0].value, 10);
+                    if (id == shelf_id) {
+                        found.push(entry);
+                    }
+                }
+            }
+
+            // sort by left to right order in 
+            // the fields are guaranteed to be there because we just constructed this
+            found.sort(function (a, b) {
+                var f = function (n) { return n.field_id == 4; };
+                var _a = a.notes.filter(f)[0];
+                var _b = b.notes.filter(f)[0];
+                return parseInt(_a.value) - parseInt(_b.value);
+            });
+        } else {
+            // normal string search
+            found = searcher.search(req.query.q);
+        }
     }
 
     var send_release_to_client = function (input, entry) {
         var html = input;
-
         html = html.replace("${size}", thumb_size);
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
         html = html.replace("${btn.find}", "https://www.discogs.com/release/" + entry.id);
         html = html.replace("${btn.play}", entry.id);
-
         return html;
     };
 
