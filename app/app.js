@@ -5,7 +5,7 @@ const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
 const ALL = 0; // id of main folder
 const thumb_size = 150;
-const max_results = 10;
+const max_results = 100;
 const port = 8080;
 
 //
