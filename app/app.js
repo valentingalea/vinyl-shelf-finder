@@ -16,6 +16,13 @@ function pretty(data) {
     return "<pre>" + stringifyObject(data) + "</pre>";
 }
 
+const os = require('os');
+function running_on_pi() {
+    // very hacky way to determine
+    // better: https://github.com/fourcube/detect-rpi
+    return os.arch === 'arm';
+}
+
 //
 // Discogs API
 //
@@ -172,9 +179,15 @@ app.get('/search', function (req, res) {
     };
 
     var client_str = "";
+
+    // disable the img caching on the Pi as it chokes on the requests :(
+    const on_pi = running_on_pi();
     var img_dl_todo = [];
+
     for (var i = 0; i < found.length; i++) {
-        prepare_cover_img(found[i], img_dl_todo);
+        if (!on_pi) {
+            prepare_cover_img(found[i], img_dl_todo);
+        }
 
         client_str += send_release_to_client(templ_file, found[i]);
 
@@ -183,9 +196,11 @@ app.get('/search', function (req, res) {
         if (i > max_results) break;
     }
 
-    // request new cover images to be downloaded
-    // bubble them up to the front of the queue
-    img_queue.unshift(img_dl_todo);
+    if (!on_pi) {
+        // request new cover images to be downloaded
+        // bubble them up to the front of the queue
+        img_queue.unshift(img_dl_todo);
+    }
 
     res.send(client_str);
 });
@@ -195,7 +210,6 @@ app.get('/all', function (req, res) {
 });
 
 app.get('/info', function (req, res) {
-    const os = require('os');
     var info = {
         client: UserAgent,
         uptime: os.uptime(),
