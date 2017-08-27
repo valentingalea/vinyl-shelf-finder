@@ -258,6 +258,11 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 });
 
 var lru_track_list = [];
+
+app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
+    res.send(pretty(lru_track_list));
+});
+
 app.get('/play/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
         if (err) {
@@ -317,7 +322,7 @@ app.get('/play/:id(\\d+)', function (req, res) {
             { label: 'Track ...', data: [{}], value: '?'}
         ];
 
-        var client_str = '<div class="btn-group" data-toggle="buttons">';
+        var client_str = `<div id="track-data" data-id="${data.id}" class="btn-group" data-toggle="buttons">`;
         var radio_item = function (label, value, is_selected) {
             var active = is_selected ? 'active' : '';
             var checked = is_selected ? 'checked' : '';

@@ -103,7 +103,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-primary">Scrobble</button>
+            <button type="button" class="btn btn-primary" id="play_btn">Scrobble</button>
           </div>
         </div>
       </div>
@@ -136,10 +136,24 @@
       });
 
       $('#play_dlg').on('show.bs.modal', function (e) {
+        $('#play_btn').prop('disabled', false);
+
         var id = $(e.relatedTarget).data('id');
-        $('.modal-body').html("Loading " + id + "...");
+        $('.modal-body').html("Loading " + id + " ...");
 
         $.get("/play/" + id, function (data) {
+            $('.modal-body').html(data);
+        });
+      });
+
+      $('#play_btn').on('click', function () {
+        $(this).prop('disabled', true);
+
+        var id = $('#track-data').data('id');
+        var type = $('#track-data label.active input').val();
+        $('.modal-body').html("Posting " + id + " for " + type + " ...");
+
+        $.get("/last.fm/" + id + "/" + type, function (data) {
             $('.modal-body').html(data);
         });
       });
