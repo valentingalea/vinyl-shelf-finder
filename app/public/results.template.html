@@ -3,9 +3,9 @@
         style="width: ${size}px; height: ${size}px;"
         data-src="holder.js/${size}x${size}/thumb" data-original="${entry.cover}">
     <div class="card-block">
-        <h5 class="card-title truncate">${entry.title}</h5>
+        <a href="${discogs}" target="_blank"><h5 class="card-title truncate">${entry.title}</h5></a>
         <h6 class="card-text truncate">${entry.artists}</h6>
-        <a href="${btn.find}" target="_blank" class="btn btn-outline-primary">Find</a>
-        <button data-id="${btn.play}" data-toggle="modal" data-target="#play_dlg" class="btn btn-outline-primary">Play</button>
+        <button data-id="${find.id}" class="btn btn-outline-primary finder">Find</button>
+        <button data-id="${play.id}" data-toggle="modal" data-target="#play_dlg" class="btn btn-outline-primary">Play</button>
     </div>
 </div>

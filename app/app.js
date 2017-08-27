@@ -37,6 +37,8 @@ var db = new Discogs(UserAgent).database();
 var my_col = new Discogs(UserAgent).user().collection();
 var json_col = [];
 var total_count = 0;
+const fl_id = function (n) { return n.field_id == Field_ShelfId; };
+const fl_pos = function (n) { return n.field_id == Field_ShelfPos; };
 
 //
 // Cache 
@@ -193,9 +195,6 @@ app.get('/search', function (req, res) {
             var cmd = tokens[0];
             var shelf_id = tokens[1];
 
-            var fl_id = function (n) { return n.field_id == Field_ShelfId; };
-            var fl_pos = function (n) { return n.field_id == Field_ShelfPos; };
- 
             var add = function (entry) {
                 var f = entry.notes.filter(fl_pos);
                 if (f.length > 0) {
@@ -247,8 +246,9 @@ app.get('/search', function (req, res) {
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
-        html = html.replace("${btn.find}", "https://www.discogs.com/release/" + entry.id);
-        html = html.replace("${btn.play}", entry.id);
+        html = html.replace("${discogs}", "https://www.discogs.com/release/" + entry.id);
+        html = html.replace("${find.id}", entry.id);
+        html = html.replace("${play.id}", entry.id);
         return html;
     };
 
@@ -292,6 +292,42 @@ app.get('/info', function (req, res) {
         type: os.type()
     };
     res.send(pretty(info));
+});
+
+app.get('/find/:id(\\d+)', function (req, res) {
+    // if (!running_on_pi()) {
+    //     res.send('Err: find can only run on the Raspberry Pi!');
+    //     return;
+    // }
+
+    var entry = json_col.find(function (i) { return i.id == req.params.id; });
+    if (entry && entry.notes) {
+        var s_id = entry.notes.find(fl_id);
+        var s_pos = entry.notes.find(fl_pos);
+        if (s_id && s_pos) {
+            res.send(`finder ${s_id.value} ${s_pos.value}`);
+
+            const path = require('path');
+            const spawn = require('child_process').spawn;
+
+            var cmd = spawn('./finder.py',
+                [s_id.value, s_pos.value], 
+                { cwd: path.join(__dirname, '..', 'pantilthat') }
+            ).on('error', err => {
+                console.error(err);
+            });
+            cmd.stdout.on('data', (data) => {
+                console.log(`finder stdout: ${data}`);
+            });
+            cmd.stderr.on('data', (data) => {
+                console.log(`finder stderr: ${data}`);
+            });
+        } else {
+            res.send('Err: entry has no id/pos fields!');
+        }
+    } else {
+        res.send('Err: invalid request!');
+    }
 });
 
 app.get('/detail/:id(\\d+)', function (req, res) {

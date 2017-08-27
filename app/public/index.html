@@ -57,8 +57,8 @@
       <div class="container">
         <div class="row">
           <div class="col-sm-12">
-            <h4 class="text-white">About</h4>
-            <p class="text-muted">https://github.com/valentingalea/vinyl-shelf-finder</p>
+            <h6 class="text-white">Debug</h6>
+            <pre class="text-muted" id="terminal"></pre>
           </div>
         </div>
       </div>
@@ -130,7 +130,15 @@
         if(key == 13) {
           $.get("/search?q=" + $(this).val(), function (data) {
             $("#results").html(data);
+
             $('.card-img-top').lazyload({skip_invisible:false});
+
+            $('.finder').on('click', function () {
+              var id = $(this).data('id');
+              $.get("/find/" + id, function (data) {
+                $('#terminal').html(data);
+              });
+            });            
           });
         }
       });
