@@ -4,6 +4,8 @@
 const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
 const ALL = 0; // id of main folder
+const field_shelf_id = 3; // the custom field note in Discogs
+const field_shelf_pos = 4;
 const thumb_size = 150;
 const max_results = 100;
 const port = 8080;
@@ -134,9 +136,26 @@ app.get('/search', function (req, res) {
         found = [ json_col[index] ];
     } else {
     // special search commands
-        if (req.query.q.indexOf('shelf:') > -1 || req.query.q.indexOf('s:') > -1) {
-            var shelf_id = req.query.q.split(':')[1];
+        if (req.query.q.indexOf('shelf:') > -1 ||
+            req.query.q.indexOf('s:') > -1 ||
+            req.query.q.indexOf('box:') > -1
+        ) {
+            var tokens = req.query.q.split(':');
+            var cmd = tokens[0];
+            var shelf_id = tokens[1];
+
+            var fl_id = function (n) { return n.field_id == field_shelf_id; };
+            var fl_pos = function (n) { return n.field_id == field_shelf_pos; };
  
+            var add = function (entry) {
+                var f = entry.notes.filter(fl_pos);
+                if (f.length > 0) {
+                    found.push(entry);
+                } else {
+                    console.log(`Warning: found entry with no position info: ${entry.id} (${entry.basic_information.title})`);
+                }
+            };
+            
             for (var i = 0; i < json_col.length; i++) {
                 var entry = json_col[i];
                 if (typeof entry.notes === 'undefined') {
@@ -144,21 +163,27 @@ app.get('/search', function (req, res) {
                     continue;
                 }
 
-                var id_def = entry.notes.filter(function (n) { return n.field_id == 3; });
+                var id_def = entry.notes.filter(fl_id);
                 if (id_def.length > 0) {
-                    var id = parseInt(id_def[0].value, 10);
-                    if (id == shelf_id) {
-                        found.push(entry);
+                    var v = id_def[0].value; 
+
+                    if (cmd === 'box') {
+                        if (v === cmd) {
+                            var pos = entry.notes.filter(fl_pos);
+                            if (pos.length > 0 && parseInt(pos[0].value, 10) == shelf_id) {
+                                add(entry);
+                            }
+                        }
+                    } else if (parseInt(v, 10) == shelf_id) {
+                        add(entry);
                     }
                 }
             }
 
-            // sort by left to right order in 
-            // the fields are guaranteed to be there because we just constructed this
+            // sort ascending by position in shelf/box
             found.sort(function (a, b) {
-                var f = function (n) { return n.field_id == 4; };
-                var _a = a.notes.filter(f)[0];
-                var _b = b.notes.filter(f)[0];
+                var _a = a.notes.filter(fl_pos)[0];
+                var _b = b.notes.filter(fl_pos)[0];
                 return parseInt(_a.value) - parseInt(_b.value);
             });
         } else {
