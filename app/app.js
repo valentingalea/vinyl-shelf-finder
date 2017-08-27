@@ -5,11 +5,13 @@
 //
 const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
-const ALL = 0; // id of main folder
-const field_shelf_id = 3; // the custom field note in Discogs
-const field_shelf_pos = 4;
+const CollectionFolder = 0; // id of main folder
+const field_shelf_id = 3; // notes custom field
+const field_shelf_pos = 4; // notes custom field 
+
 const thumb_size = 150;
 const max_results = 100;
+
 const port = 8080;
 
 //
@@ -37,18 +39,20 @@ var json_col = [];
 var total_count = 0;
 
 //
-// Discogs requests cache 
+// Cache 
 //
 console.log("Loading cache...");
-var flatCache = require('flat-cache');
-const cache_file = 'discogs';
+var flat_cache = require('flat-cache');
+
 function get_cache_dir() {
     return __dirname + '/cache/';
 }
-function init_cache() {
-    return flatCache.load(cache_file, get_cache_dir());
+
+function init_discogs_cache() {
+    const discogs_cache_file = 'discogs';
+    return flat_cache.load(discogs_cache_file, get_cache_dir());
 }
-var cache = init_cache();
+var discogs_cache = init_discogs_cache();
 
 //
 // image download cache
@@ -93,6 +97,49 @@ function prepare_cover_img(entry, cache_todo) {
         cache_todo.push(job);
     };
 };
+
+//
+// last.fm
+//
+// console.log("Preparing Last.fm...");
+
+// const last_fm_api = require('last.fm.api');
+// const last_fm = new last_fm_api({ 
+//     apiKey: "c84750248c82a9e2254a6f600091e143", 
+//     apiSecret: "b55c17e5a586a92106c24e42d72d2cec",
+//     username: "vinyltin",
+//     passworld: "last.fmstew42pigs",
+//     debug: true
+// });
+
+// function init_last_fm_cache() {
+//     const cache_file = 'last.fm';
+//     return flat_cache.load(cache_file, get_cache_dir());
+// }
+// var last_fm_cache = init_last_fm_cache();
+
+// var last_fm_session = function() {
+//     var value = last_fm_cache.getKey('session')
+//     if (typeof value === 'undefined') {
+//         last_fm.auth
+//         .getMobileSession({})
+//         .then(json => json.session)
+//         .then(session => {
+//             last_fm_session = session;
+//             last_fm_cache.setKey('session', session);
+//             last_fm_cache.save({noPrune: true});
+//         })
+//         .then(result => {
+//             console.log('Logged in to last.fm ', result);
+//         })
+//         .catch(err => {
+//             console.error('Error with last.fm', err);
+//         });
+//         return undefined;
+//     } else {
+//         return value;
+//     }
+// }();
 
 //
 // Search
@@ -353,22 +400,22 @@ app.get('/play/:id(\\d+)', function (req, res) {
 //
 console.log("Starting...");
 
-var get_folder = my_col.getFolder(User, ALL);
+var get_folder = my_col.getFolder(User, CollectionFolder);
 
 const page_items = 100; // max API limit is 100
 var page_count = 0;
 var page_iter = 1;
 
 function get_page(n) {
-    if (typeof cache.getKey(n) === "undefined") {
+    if (typeof discogs_cache.getKey(n) === "undefined") {
         process.stdout.write('Downloading page ' + n + '...');
         
-        return my_col.getReleases(User, ALL, { page: n, per_page: page_items });
+        return my_col.getReleases(User, CollectionFolder, { page: n, per_page: page_items });
     } else {
         process.stdout.write('Readback cached page ' + n + '...');
 
         return new Promise(function (resolve, reject) {
-            return resolve(cache.getKey(n));
+            return resolve(discogs_cache.getKey(n));
         });
     }
 }
@@ -384,10 +431,10 @@ function async_loop() {
         return get_page(page_iter).then(function (data) {
             console.log("done");
 
-            var old_data = cache.getKey(page_iter);
+            var old_data = discogs_cache.getKey(page_iter);
             if (typeof old_data === "undefined") {
-                cache.setKey(page_iter, data);
-                cache.save({noPrune: true});
+                discogs_cache.setKey(page_iter, data);
+                discogs_cache.save({noPrune: true});
                 console.log("Cached page " + page_iter);
             }
 
@@ -405,7 +452,7 @@ function async_loop() {
 };
 
 function get_cached_count() {
-    var old_count = cache.getKey('count');
+    var old_count = discogs_cache.getKey('count');
     if (typeof old_count === "undefined") {
         return 0;
     } else {
@@ -427,12 +474,12 @@ get_folder
     if (old_count != total_count) {
         console.log("Cache invalidated!");
 
-        cache.destroy();
-        cache = init_cache();
+        discogs_cache.destroy();
+        discogs_cache = init_discogs_cache();
         //TODO: this is not ideal as it can corrupt the cache
         // if the later retrievals fail
-        cache.setKey('count', total_count);
-        cache.save({noPrune: true});
+        discogs_cache.setKey('count', total_count);
+        discogs_cache.save({noPrune: true});
     }
     
     start_loading();
