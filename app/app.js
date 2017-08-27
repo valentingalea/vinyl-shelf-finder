@@ -6,13 +6,13 @@
 const UserAgent = 'vinyl-shelf-finder/1.0';
 const User = 'valentingalea';
 const CollectionFolder = 0; // id of main folder
-const field_shelf_id = 3; // notes custom field
-const field_shelf_pos = 4; // notes custom field 
+const Field_ShelfId = 3; // notes custom field
+const Field_ShelfPos = 4; // notes custom field 
 
-const thumb_size = 150;
-const max_results = 100;
+const ThumbSize = 150;
+const MaxResults = 100;
 
-const port = 8080;
+const Port = 8080;
 
 //
 // Debug
@@ -193,8 +193,8 @@ app.get('/search', function (req, res) {
             var cmd = tokens[0];
             var shelf_id = tokens[1];
 
-            var fl_id = function (n) { return n.field_id == field_shelf_id; };
-            var fl_pos = function (n) { return n.field_id == field_shelf_pos; };
+            var fl_id = function (n) { return n.field_id == Field_ShelfId; };
+            var fl_pos = function (n) { return n.field_id == Field_ShelfPos; };
  
             var add = function (entry) {
                 var f = entry.notes.filter(fl_pos);
@@ -243,7 +243,7 @@ app.get('/search', function (req, res) {
 
     var send_release_to_client = function (input, entry) {
         var html = input;
-        html = html.replace("${size}", thumb_size);
+        html = html.replace("${size}", ThumbSize);
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
@@ -267,7 +267,7 @@ app.get('/search', function (req, res) {
 
         // cut short to not overload with requests
         // TODO: pagination support
-        if (i > max_results) break;
+        if (i > MaxResults) break;
     }
 
     if (!on_pi) {
@@ -421,8 +421,8 @@ function get_page(n) {
 }
 
 function start_server(){
-    app.listen(port, function () {
-        console.log('Listening on ' + port + '...');
+    app.listen(Port, function () {
+        console.log('Listening on ' + Port + '...');
     }); 
 }
 
