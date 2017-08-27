@@ -29,3 +29,11 @@ found a new GPIO/pwm lib: http://abyz.co.uk/rpi/pigpio/python.html
 way more low-level tho, couldn't do anythng need more time
 
 trial & tribulations with the image cache: turns out the Pi chokes on the <img> clients request anyway, so the caching ideas was useless so I turned it off for now. Consider turning into a microservice that I can move to the main machine, or some express throthling...
+
+27 august
+---------
+trying last.fm -- didn't work :( all repos are super old
+
+having to upgrade nodejs on both main dev machine and pi - they are on 4.x, latest stable is 6.x (btw the Pi comes with 0.2!)
+distributions are here: https://nodejs.org/dist/v6.11.2/
+using guide from: https://blog.miniarray.com/installing-node-js-on-a-raspberry-pi-zero-21a1522db2bb
