@@ -255,6 +255,7 @@ app.get('/detail/:id(\\d+)', function (req, res) {
     });
 });
 
+var lru_track_list = [];
 app.get('/play/:id(\\d+)', function (req, res) {
     db.getRelease(req.params.id, function(err, data){
         if (err) {
@@ -276,12 +277,13 @@ app.get('/play/:id(\\d+)', function (req, res) {
 
         var main_artist = data.artists[0].name;
         var main_album = data.title;
-        var track_data = data.tracklist;
+        var main_tracks = data.tracklist;
 
-        var tracklist = [];
+        lru_track_list.length = 0; // https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
         var play_time = Math.floor(Date.now() / 1000);
-        for (var i = 0; i < track_data.length; i++) {
-            var t = track_data[i];
+
+        for (var i = 0; i < main_tracks.length; i++) {
+            var t = main_tracks[i];
             if ((t.position === '') || (t.type_ != 'track')) continue;
 
             // https://www.last.fm/api/show/track.scrobble
@@ -296,21 +298,21 @@ app.get('/play/:id(\\d+)', function (req, res) {
             };
 
             play_time += parse_duration(t.duration);
-            tracklist.push(track_scrobble);
+            lru_track_list.push(track_scrobble);
         }
 
         var side = function (S) {
-            return tracklist.filter(function (i) { 
+            return lru_track_list.filter(function (i) { 
                 return i.trackNumber.indexOf(S) >= 0;
             });
         };
         var radio_data = [ 
-            { label: 'All tracks', data: tracklist, value: '*' },
+            { label: 'All Tracks', data: lru_track_list, value: '*' },
             { label: 'Side A', data: side('A'), value: 'A' },
             { label: 'Side B', data: side('B'), value: 'B' },
             { label: 'Side C', data: side('C'), value: 'C' },
             { label: 'Side D', data: side('D'), value: 'D' },
-            { label: 'Track...', data: [{}], value: '?'}
+            { label: 'Track ...', data: [{}], value: '?'}
         ];
 
         var client_str = '<div class="btn-group" data-toggle="buttons">';
@@ -330,8 +332,8 @@ app.get('/play/:id(\\d+)', function (req, res) {
         client_str += '</div>';
 
         client_str += '<br><br><ol class="list-group">';
-        for (var i = 0; i < tracklist.length; i++) {
-            client_str += `<li class="list-group-item">${tracklist[i].track}</li>`;
+        for (var i = 0; i < lru_track_list.length; i++) {
+            client_str += `<li class="list-group-item">${lru_track_list[i].track}</li>`;
         }
         client_str += '<ol>';
 
