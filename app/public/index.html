@@ -143,6 +143,16 @@
         }
       });
 
+      function setup_track_list() {
+        $('.list-group li').click(function(e) {
+          $('.list-group').find('li').removeClass('active');
+          $(this).addClass('active');
+
+          $('#btn_track').val($(this).index());
+          $('#btn_track').trigger('click');
+        });
+      };
+
       $('#play_dlg').on('show.bs.modal', function (e) {
         $('#play_btn').prop('disabled', false);
 
@@ -151,6 +161,7 @@
 
         $.get("/play/" + id, function (data) {
             $('.modal-body').html(data);
+            setup_track_list();
         });
       });
 
@@ -159,7 +170,7 @@
 
         var id = $('#track-data').data('id');
         var type = $('#track-data label.active input').val();
-        $('.modal-body').html("Posting " + id + " for " + type + " ...");
+        $('.modal-body').html("Posting " + id + " ...");
 
         $.get("/last.fm/" + id + "/" + type, function (data) {
             $('.modal-body').html(data);

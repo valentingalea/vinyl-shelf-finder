@@ -343,10 +343,38 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 });
 
 var lru_track_list = [];
+var side = function (S) {
+    return lru_track_list.filter(function (i) { 
+        return i.trackNumber.indexOf(S) >= 0;
+    });
+};
 
 app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
+    if (!lru_track_list.length) {
+        res.send('invalid request');
+        return;
+    }
+
+    var tracks_to_submit = undefined;
+    var cmd = req.params.type;
+
+    if (cmd === '*') {
+        tracks_to_submit = lru_track_list;
+    } else
+    if ('ABCD'.indexOf(cmd) >= 0) {
+        tracks_to_submit = side(cmd);
+    } else {
+        var n = parseInt(cmd, 10) || 0;
+        n = n % lru_track_list.length;
+        tracks_to_submit = lru_track_list[n];
+    }
+    if (!tracks_to_submit) {
+        res.send('invalid request');
+        return;
+    }
+    
     last_fm.track.scrobble({
-        tracks: lru_track_list,
+        tracks: tracks_to_submit,
         sk: last_fm_session.key
     })
     .then(json => {
@@ -403,39 +431,34 @@ app.get('/play/:id(\\d+)', function (req, res) {
             lru_track_list.push(track_scrobble);
         }
 
-        var side = function (S) {
-            return lru_track_list.filter(function (i) { 
-                return i.trackNumber.indexOf(S) >= 0;
-            });
-        };
         var radio_data = [ 
-            { label: 'All Tracks', data: lru_track_list, value: '*' },
-            { label: 'Side A', data: side('A'), value: 'A' },
-            { label: 'Side B', data: side('B'), value: 'B' },
-            { label: 'Side C', data: side('C'), value: 'C' },
-            { label: 'Side D', data: side('D'), value: 'D' },
-            { label: 'Track ...', data: [{}], value: '?'}
+            { label: 'All Tracks', id: 'btn_all', data: lru_track_list, value: '*' },
+            { label: 'Side A', id: 'btn_A', data: side('A'), value: 'A' },
+            { label: 'Side B', id: 'btn_B', data: side('B'), value: 'B' },
+            { label: 'Side C', id: 'btn_C', data: side('C'), value: 'C' },
+            { label: 'Side D', id: 'btn_D', data: side('D'), value: 'D' },
+            { label: 'Track ...', id: 'btn_track', data: [{}], value: '0'}
         ];
 
         var client_str = `<div id="track-data" data-id="${data.id}" class="btn-group" data-toggle="buttons">`;
-        var radio_item = function (label, value, is_selected) {
+        var radio_item = function (label, id, value, is_selected) {
             var active = is_selected ? 'active' : '';
             var checked = is_selected ? 'checked' : '';
             return `<label class="btn btn-secondary ${active}">
-                 <input type="radio" value="${value} ${checked}" autocomplete="off">${label}
+                 <input type="radio" id="${id}" value="${value}" ${checked} autocomplete="off">${label}
             </label>`;
         };
         for (var i = 0; i < radio_data.length; i++) {
             var s = radio_data[i];
             if (s.data.length > 0) {
-                client_str += radio_item(s.label, s.value, i === 0);
+                client_str += radio_item(s.label, s.id, s.value, i === 0);
             }
         }
         client_str += '</div>';
 
         client_str += '<br><br><ol class="list-group">';
         for (var i = 0; i < lru_track_list.length; i++) {
-            client_str += `<li class="list-group-item">${lru_track_list[i].track}</li>`;
+            client_str += `<li class="list-group-item list-group-item-action">${lru_track_list[i].track}</li>`;
         }
         client_str += '<ol>';
 
