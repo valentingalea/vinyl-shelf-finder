@@ -103,45 +103,47 @@ function prepare_cover_img(entry, cache_todo) {
 //
 // last.fm
 //
-// console.log("Preparing Last.fm...");
+console.log("Preparing Last.fm...");
 
-// const last_fm_api = require('last.fm.api');
-// const last_fm = new last_fm_api({ 
-//     apiKey: "c84750248c82a9e2254a6f600091e143", 
-//     apiSecret: "b55c17e5a586a92106c24e42d72d2cec",
-//     username: "vinyltin",
-//     passworld: "last.fmstew42pigs",
-//     debug: true
-// });
+const last_fm_secrets = { 
+    apiKey: "c84750248c82a9e2254a6f600091e143", 
+    apiSecret: "b55c17e5a586a92106c24e42d72d2cec",
+    username: "vinyltin",
+    password: "last.fmstew42pigs"
+};
 
-// function init_last_fm_cache() {
-//     const cache_file = 'last.fm';
-//     return flat_cache.load(cache_file, get_cache_dir());
-// }
-// var last_fm_cache = init_last_fm_cache();
+const last_fm_api = require('last.fm.api');
+const last_fm = new last_fm_api(Object.assign(last_fm_secrets, { debug: true }));
 
-// var last_fm_session = function() {
-//     var value = last_fm_cache.getKey('session')
-//     if (typeof value === 'undefined') {
-//         last_fm.auth
-//         .getMobileSession({})
-//         .then(json => json.session)
-//         .then(session => {
-//             last_fm_session = session;
-//             last_fm_cache.setKey('session', session);
-//             last_fm_cache.save({noPrune: true});
-//         })
-//         .then(result => {
-//             console.log('Logged in to last.fm ', result);
-//         })
-//         .catch(err => {
-//             console.error('Error with last.fm', err);
-//         });
-//         return undefined;
-//     } else {
-//         return value;
-//     }
-// }();
+function init_last_fm_cache() {
+    const cache_file = 'last.fm';
+    return flat_cache.load(cache_file, get_cache_dir());
+}
+var last_fm_cache = init_last_fm_cache();
+
+var last_fm_session = function() {
+    var value = last_fm_cache.getKey('session')
+    if (typeof value === 'undefined') {
+        last_fm.auth
+        .getMobileSession({})
+        .then(json => json.session)
+        .then(session => {
+            last_fm_session = session;
+            last_fm_cache.setKey('session', session);
+            last_fm_cache.save({noPrune: true});
+        })
+        .then(result => {
+            console.log('Logged in to Last.fm');
+        })
+        .catch(err => {
+            console.error('Error with Last.fm', err);
+        });
+        return undefined;
+    } else {
+        console.log("Found Last.fm session")
+        return value;
+    }
+}();
 
 //
 // Search
@@ -343,7 +345,17 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 var lru_track_list = [];
 
 app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
-    res.send(pretty(lru_track_list));
+    last_fm.track.scrobble({
+        tracks: lru_track_list,
+        sk: last_fm_session.key
+    })
+    .then(json => {
+        console.log(json);
+        res.send(`Sent to <a href="https://www.last.fm/user/${last_fm_secrets.username}" target="_blank">Last.fm</a>!`);
+    })
+    .catch(err => {
+        console.error(err);
+    });
 });
 
 app.get('/play/:id(\\d+)', function (req, res) {
