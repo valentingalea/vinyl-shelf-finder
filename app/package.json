@@ -24,5 +24,9 @@
     "iot"
   ],
   "author": "Valentin Galea",
-  "license": "MIT"
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/valentingalea/vinyl-shelf-finder.git"
+  }  
 }
