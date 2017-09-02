@@ -3,16 +3,7 @@
 //
 // Config
 //
-const UserAgent = 'vinyl-shelf-finder/1.0';
-const User = 'valentingalea';
-const CollectionFolder = 0; // id of main folder
-const Field_ShelfId = 3; // notes custom field
-const Field_ShelfPos = 4; // notes custom field 
-
-const ThumbSize = 150;
-const MaxResults = 100;
-
-const Port = 8080;
+const Config = require('./src/config.js');
 
 //
 // Debug
@@ -33,12 +24,12 @@ function running_on_pi() {
 // Discogs API
 //
 var Discogs = require('disconnect').Client;
-var db = new Discogs(UserAgent).database();
-var my_col = new Discogs(UserAgent).user().collection();
+var db = new Discogs(Config.Discogs.UserAgent).database();
+var my_col = new Discogs(Config.Discogs.UserAgent).user().collection();
 var json_col = [];
 var total_count = 0;
-const fl_id = function (n) { return n.field_id == Field_ShelfId; };
-const fl_pos = function (n) { return n.field_id == Field_ShelfPos; };
+const fl_id = function (n) { return n.field_id == Config.Discogs.Field_ShelfId; };
+const fl_pos = function (n) { return n.field_id == Config.Discogs.Field_ShelfPos; };
 
 //
 // Cache 
@@ -88,7 +79,7 @@ function prepare_cover_img(entry, cache_todo) {
         var download_req = {
             url: entry.basic_information.cover_image,
             headers: {
-                'User-Agent': UserAgent
+                'User-Agent': Config.Discogs.UserAgent
             }
         };
         var job = {
@@ -233,7 +224,7 @@ app.get('/search', function (req, res) {
 
     var send_release_to_client = function (input, entry) {
         var html = input;
-        html = html.replace("${size}", ThumbSize);
+        html = html.replace("${size}", Config.Client.ThumbSize);
         html = html.replace('${entry.title}', entry.basic_information.title);
         html = html.replace("${entry.artists}", entry.basic_information.artists[0].name);
         html = html.replace("${entry.cover}", entry.basic_information.cover_image);
@@ -258,7 +249,7 @@ app.get('/search', function (req, res) {
 
         // cut short to not overload with requests
         // TODO: pagination support
-        if (i > MaxResults) break;
+        if (i > Config.Client.MaxResults) break;
     }
 
     if (!on_pi) {
@@ -276,7 +267,7 @@ app.get('/all', function (req, res) {
 
 app.get('/info', function (req, res) {
     var info = {
-        client: UserAgent,
+        client: Config.Discogs.UserAgent,
         uptime: os.uptime(),
         cpu: os.cpus(),
         archicture: os.arch(),
@@ -460,7 +451,7 @@ app.get('/play/:id(\\d+)', function (req, res) {
 //
 console.log("Starting...");
 
-var get_folder = my_col.getFolder(User, CollectionFolder);
+var get_folder = my_col.getFolder(Config.Discogs.User, Config.Discogs.CollectionFolder);
 
 const page_items = 100; // max API limit is 100
 var page_count = 0;
@@ -470,7 +461,7 @@ function get_page(n) {
     if (typeof discogs_cache.getKey(n) === "undefined") {
         process.stdout.write('Downloading page ' + n + '...');
         
-        return my_col.getReleases(User, CollectionFolder, { page: n, per_page: page_items });
+        return my_col.getReleases(Config.Discogs.User, Config.Discogs.CollectionFolder, { page: n, per_page: page_items });
     } else {
         process.stdout.write('Readback cached page ' + n + '...');
 
@@ -481,8 +472,8 @@ function get_page(n) {
 }
 
 function start_server(){
-    app.listen(Port, function () {
-        console.log('Listening on ' + Port + '...');
+    app.listen(Config.Server.Port, function () {
+        console.log('Listening on ' + Config.Server.Port + '...');
     }); 
 }
 
