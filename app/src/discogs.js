@@ -19,7 +19,6 @@ DG.flt_pos = function (n) { return n.field_id == Config.Discogs.Field_ShelfPos; 
 const page_items = 100; // max API limit is 100
 var page_count = 0;
 var page_iter = 1;
-var total_count = 0;
 
 function get_page(n) {
     if (typeof cache.discogs.getKey(n) === "undefined") {
@@ -58,6 +57,12 @@ function async_loop(on_done) {
     } else {
         on_done();
     }
+}
+
+var total_count = 0;
+
+DG.get_count = function() {
+    return total_count;
 }
 
 function get_cached_count() {

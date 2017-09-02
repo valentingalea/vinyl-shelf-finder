@@ -11,7 +11,7 @@ module.exports = function(req, templ_file, pub_dir, on_pi) {
     var found = [];
     if (!req.query.q || req.query.q === "") {
     // if not search string, get a random one
-        var index = Math.round(Math.random() * total_count);
+        var index = Math.round(Math.random() * DG.get_count());
         found = [ DG.raw_col[index] ];
     } else {
     // special search commands

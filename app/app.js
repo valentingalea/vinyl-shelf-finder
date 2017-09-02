@@ -100,9 +100,9 @@ app.get('/', function (req, res) {
     res.sendFile('index.html', { root: get_pub_dir() }); 
 });
 
+const cmd_search = require('./src/cmd_search.js');
 app.get('/search', function (req, res) {
-    const cmd = require('./src/cmd_search.js');
-    res.send(cmd(req, templ_file, get_pub_dir(), running_on_pi()));
+    res.send(cmd_search(req, templ_file, get_pub_dir(), running_on_pi()));
 });
 
 app.get('/all', function (req, res) {
@@ -120,40 +120,13 @@ app.get('/info', function (req, res) {
     res.send(pretty(info));
 });
 
+const cmd_find = require('./src/cmd_find.js');
 app.get('/find/:id(\\d+)', function (req, res) {
-    // if (!running_on_pi()) {
-    //     res.send('Err: find can only run on the Raspberry Pi!');
-    //     return;
-    // }
-
-    var entry = DG.raw_col.find(function (i) { return i.id == req.params.id; });
-    if (entry && entry.notes) {
-        var s_id = entry.notes.find(DG.flt_id);
-        var s_pos = entry.notes.find(DG.flt_pos);
-        if (s_id && s_pos) {
-            res.send(`finder ${s_id.value} ${s_pos.value}`);
-
-            const path = require('path');
-            const spawn = require('child_process').spawn;
-
-            var cmd = spawn('./finder.py',
-                [s_id.value, s_pos.value], 
-                { cwd: path.join(__dirname, '..', 'pantilthat') }
-            ).on('error', err => {
-                console.error(err);
-            });
-            cmd.stdout.on('data', (data) => {
-                console.log(`finder stdout: ${data}`);
-            });
-            cmd.stderr.on('data', (data) => {
-                console.log(`finder stderr: ${data}`);
-            });
-        } else {
-            res.send('Err: entry has no id/pos fields!');
-        }
-    } else {
-        res.send('Err: invalid request!');
+    if (!running_on_pi()) {
+        res.send('Err: find can only run on the Raspberry Pi!');
+        return;
     }
+    cmd_find(req, res);
 });
 
 app.get('/detail/:id(\\d+)', function (req, res) {
