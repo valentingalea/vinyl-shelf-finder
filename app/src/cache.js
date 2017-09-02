@@ -15,3 +15,10 @@ cache.init_discogs = function () {
 
     cache.discogs = cache.instance.load('discogs', cache.get_dir());
 };
+
+cache.last_fm = undefined;
+cache.init_last_fm = function () {
+    console.log("Loading Last.fm cache...");
+
+    cache.last_fm = cache.instance.load('last.fm', cache.get_dir());
+};
