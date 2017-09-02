@@ -532,7 +532,7 @@ function get_cached_count() {
 }
 
 function start_loading() {
-    page_count = Math.round(total_count / page_items);
+    page_count = Math.ceil(total_count / page_items);
     console.log("Found " + total_count + " records, retrieving all in " + page_count + " steps...");
     async_loop();
 }
