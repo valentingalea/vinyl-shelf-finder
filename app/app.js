@@ -148,18 +148,7 @@ var last_fm_session = function() {
 //
 // Search
 //
-var fuseJs = require("fuse.js");
-var searcher = undefined;
-
-function init_search() {
-    console.log("Indexing...");
-    
-    var options = {
-        keys: [ 'basic_information.title', 'basic_information.artists.name' ],
-        threshold: 0.15
-    };
-    searcher = new fuseJs(json_col, options);
-}
+const searcher = require('./src/search.js');
 
 //
 // Express REST server
@@ -238,7 +227,7 @@ app.get('/search', function (req, res) {
             });
         } else {
     // normal string search
-            found = searcher.search(req.query.q);
+            found = searcher.instance.search(req.query.q);
         }
     }
 
@@ -517,7 +506,7 @@ function async_loop() {
             console.log("During async_loop: " + err);
         });
     } else {
-        init_search();
+        searcher.init_search(json_col);
         start_server();
     }
 };
