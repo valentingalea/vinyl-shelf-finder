@@ -10,6 +10,10 @@ lru.side = function (S) {
     });
 };
 
+lru.timestamp = function() {
+    return Math.floor(Date.now() / 1000);
+}
+
 lru.filter = function (cmd) {
     var tracks_to_submit = undefined;
 
@@ -17,7 +21,7 @@ lru.filter = function (cmd) {
         tracks_to_submit = lru.track_list;
     } else
     if ('ABCD'.indexOf(cmd) >= 0) {
-        tracks_to_submit = side(cmd);
+        tracks_to_submit = lru.side(cmd);
     } else {
         var n = parseInt(cmd, 10) || 0;
         n = n % lru.track_list.length;

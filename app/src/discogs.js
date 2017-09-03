@@ -13,8 +13,6 @@ const api_get_folder = api_col.getFolder(Config.Discogs.User, Config.Discogs.Col
 DG.api_db = api_db;
 DG.api_col = api_col;
 DG.raw_col = [];
-DG.flt_id = function (n) { return n.field_id == Config.Discogs.Field_ShelfId; };
-DG.flt_pos = function (n) { return n.field_id == Config.Discogs.Field_ShelfPos; };
 
 const page_items = 100; // max API limit is 100
 var page_count = 0;
@@ -109,3 +107,36 @@ DG.load = function(on_done) {
         }
     });
 };
+
+DG.find_by_id = function (id) {
+    return DG.raw_col.find(function (i) {
+        return i.id == id;
+    });
+};
+
+function read_note(entry, field) {
+    if (!entry || !entry.notes) {
+        console.error('Found entry with no shelf info: ' + (entry ? entry.id : 'null'));
+        return -1;
+    }
+
+    var f = entry.notes.filter(function (n) {
+        return n.field_id == field
+    });
+    if (!f || f.length == 0) {
+        console.error(`Found entry ${entry.id} with no field info for ${field}`);
+        return -1;
+    }
+
+    var v = f[0].value;
+    if (v === 'box') return v;
+    return parseInt(v, 10);
+}
+
+DG.get_shelf_id = function (entry) {
+    return read_note(entry, Config.Discogs.Field_ShelfId);
+}
+
+DG.get_shelf_pos = function (entry) {
+    return read_note(entry, Config.Discogs.Field_ShelfPos);
+}

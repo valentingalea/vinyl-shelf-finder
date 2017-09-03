@@ -23,44 +23,27 @@ module.exports = function(req, templ_file, pub_dir, on_pi) {
             var cmd = tokens[0];
             var shelf_id = tokens[1];
 
-            var add = function (entry) {
-                var f = entry.notes.filter(DG.flt_pos);
-                if (f.length > 0) {
-                    found.push(entry);
-                } else {
-                    console.log(`Warning: found entry with no position info: ${entry.id} (${entry.basic_information.title})`);
-                }
-            };
-            
             for (var i = 0; i < DG.raw_col.length; i++) {
                 var entry = DG.raw_col[i];
-                if (typeof entry.notes === 'undefined') {
-                    console.log(`Warning: found entry with no shelf info: ${entry.id} (${entry.basic_information.title})`);
-                    continue;
-                }
-
-                var id_def = entry.notes.filter(DG.flt_id);
-                if (id_def.length > 0) {
-                    var v = id_def[0].value; 
-
-                    if (cmd === 'box') {
-                        if (v === cmd) {
-                            var pos = entry.notes.filter(DG.flt_pos);
-                            if (pos.length > 0 && parseInt(pos[0].value, 10) == shelf_id) {
-                                add(entry);
-                            }
+                var n_id = DG.get_shelf_id(entry);
+                
+                if (cmd === 'box') {
+                    if (n_id === 'box') {
+                        var pos = DG.get_shelf_pos(entry);
+                        if (pos == shelf_id) {
+                            found.push(entry);
                         }
-                    } else if (parseInt(v, 10) == shelf_id) {
-                        add(entry);
+                    }
+                } else {
+                    if (parseInt(n_id, 10) == shelf_id) {
+                        found.push(entry);
                     }
                 }
             }
 
             // sort ascending by position in shelf/box
             found.sort(function (a, b) {
-                var _a = a.notes.filter(DG.flt_pos)[0];
-                var _b = b.notes.filter(DG.flt_pos)[0];
-                return parseInt(_a.value) - parseInt(_b.value);
+                return DG.get_shelf_pos(a) - DG.get_shelf_pos(b);
             });
         } else {
     // normal string search

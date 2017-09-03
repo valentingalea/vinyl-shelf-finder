@@ -39,12 +39,11 @@ app.use(express.static(get_pub_dir()));
 const fs = require('fs');
 const templ_file = fs.readFileSync(get_pub_dir() + 'results.template.html', 'utf8');
 
+//
+// index routing & debug
+//
 app.get('/', function (req, res) {
     res.sendFile('index.html', { root: get_pub_dir() }); 
-});
-
-app.get('/all', function (req, res) {
-    res.send(pretty(DG.raw_col));
 });
 
 app.get('/info', function (req, res) {
@@ -58,6 +57,13 @@ app.get('/info', function (req, res) {
     res.send(pretty(info));
 });
 
+//
+// Direct Discogs queries
+//
+app.get('/all', function (req, res) {
+    res.send(pretty(DG.raw_col));
+});
+
 app.get('/detail/:id(\\d+)', function (req, res) {
     DG.api_db.getRelease(req.params.id, function(err, data){
         if (err) {
@@ -68,43 +74,79 @@ app.get('/detail/:id(\\d+)', function (req, res) {
     });
 });
 
+//
+// Search
+//
 const cmd_search = require('./src/cmd_search.js');
 
 app.get('/search', function (req, res) {
     res.send(cmd_search(req, templ_file, get_pub_dir(), running_on_pi()));
 });
 
+//
+// Finder
+//
 const cmd_find = require('./src/cmd_find.js');
 
 app.get('/find/:id(\\d+)', function (req, res) {
-    if (!running_on_pi()) {
-        res.send('Err: find can only run on the Raspberry Pi!');
-        return;
-    }
+    // if (!running_on_pi()) {
+    //     res.send('Err: find can only run on the Raspberry Pi!');
+    //     return;
+    // }
     cmd_find(req, res);
 });
 
+//
+// Play dialog and tracks
+//
 const lru = require('./src/lru.js');
-const last_fm = require('./src/last_fm');
-
-app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
-    if (!lru.track_list.length) {
-        res.send('invalid request');
-        return;
-    }
-
-    var to_submit = lru.filter(req.params.type);
-    if (!to_submit) {
-        res.send('invalid request');
-        return;
-    }
-    
-    last_fm.scrobble(to_submit, res);
-});
 
 const cmd_play = require('./src/cmd_play.js');
 app.get('/play/:id(\\d+)', function (req, res) {
     cmd_play(req, res);
+});
+
+//
+// Sqlite local database
+//
+const db = require('./src/sqlite.js');
+
+app.get('/db-create', function (req, res) {
+    db.create();
+    res.send("Creating database...");
+});
+
+//
+// Last.fm
+//
+const last_fm = require('./src/last_fm');
+
+app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
+    var entry = DG.find_by_id(req.params.id);
+
+    if (!lru.track_list.length || !entry) {
+        res.send('invalid request');
+        return;
+    }
+
+    var cmd = req.params.type;
+    var to_submit = lru.filter(cmd);
+    if (!to_submit) {
+        res.send('invalid request');
+        return;
+    }
+
+    var info = {
+        $release: entry.id,
+        $timestamp: lru.timestamp(),
+        $shelf_id: DG.get_shelf_id(entry),
+        $shelf_pos: DG.get_shelf_pos(entry),
+        $cmd: cmd,
+        $track_data: stringifyObject(to_submit)
+    };
+    db.add(info);
+
+    last_fm.scrobble(to_submit, res);
 });
 
 //

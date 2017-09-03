@@ -5,18 +5,16 @@ const path = require('path');
 const spawn = require('child_process').spawn;
 
 module.exports = function(req, res) {
-    var entry = DG.raw_col.find(function (i) {
-        return i.id == req.params.id; }
-    );
+    var entry = DG.find_by_id(req.params.id);
 
     if (entry && entry.notes) {
-        var s_id = entry.notes.find(DG.flt_id);
-        var s_pos = entry.notes.find(DG.flt_pos);
-        if (s_id && s_pos) {
-            res.send(`finder ${s_id.value} ${s_pos.value}`);
+        var s_id = DG.get_shelf_id(entry);
+        var s_pos = DG.get_shelf_pos(entry);
+        if (s_id !== 'box' && s_id >= 0 && s_pos >= 0) {
+            res.send(`finder ${s_id} ${s_pos}`);
 
             var cmd = spawn('./finder.py',
-                [s_id.value, s_pos.value], 
+                [s_id, s_pos], 
                 { cwd: path.join(__dirname, '..', '..', 'pantilthat') }
             ).on('error', err => {
                 console.error(err);
@@ -28,7 +26,11 @@ module.exports = function(req, res) {
                 console.log(`finder stderr: ${data}`);
             });
         } else {
-            res.send('Err: entry has no id/pos fields!');
+            if (s_id === 'box') {
+                res.send('TODO: cannot find in box!');
+            } else {
+                res.send('Err: entry invalid id/pos fields!');
+            }
         }
     } else {
         res.send('Err: invalid request!');

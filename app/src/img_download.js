@@ -5,6 +5,7 @@ var img_download = module.exports = {};
 const fs = require('fs');
 const request = require('request');
 const tress = require('tress');
+const Config = require('./config.js');
 
 function download_img_task(job, done) {
     try {
