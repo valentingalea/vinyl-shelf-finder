@@ -21,9 +21,9 @@ function download_img_task(job, done) {
 
 img_download.queue = tress(download_img_task, 8/*concurency*/);
 
-img_download.get_and_cache = function (entry, img_dir, cache_todo) {
+img_download.get_and_cache = function (entry, pub_dir, cache_todo) {
     var img_local = "img_cache/" + entry.id + ".jpg";
-    var img_file_name = img_dir + img_local;
+    var img_file_name = pub_dir + img_local;
 
     if (fs.existsSync(img_file_name)) {
         entry.basic_information.cover_image = img_local;
