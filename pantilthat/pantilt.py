@@ -3,6 +3,7 @@
 import pantilthat
 import time
 import sys
+import servo_ranges
 
 def tick():
 	time.sleep(0.015)
@@ -11,6 +12,9 @@ def tick():
 if len(sys.argv) != 3:
 	print "Usage: <pan> <tilt> in degrees\n"
 	exit()
+
+# setup
+servo_ranges.calibrate()
 
 # read last cmd
 orig_pan = pantilthat.get_pan()
