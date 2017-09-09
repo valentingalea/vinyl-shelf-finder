@@ -1,0 +1,76 @@
+= Vinyl Shelf Finder
+
+== About
+*Vinyltin* - is a app that manages a Discogs user records collection and helps locate them in shelving cabinets - provided a certain ordering is maintained.
+
+== Features
+WIP and very primitive
+
+- web app powered by Node.js
+- custom searches in a Discogs collection
+- cover art display with optional image caching
+- Last.fm integration (as well as local database backup)
+- interfaces with a hardware pan-tilt laser pointer
+
+== Installation
+DISCLAMER: for the brave, no guarantees
+
+=== Node.js
+
+Install https://nodejs.org/en/download/[Node.js] 6.x+
+
+Clone / download this repository; navigate to the `app` folder
+
+`cd app`
+
+Install all the dependencies
+
+`npm install`
+
+=== Setup
+
+Open `app/src/config.js` and edit appropriately with your Discogs.com info.
+
+Optionally - navigate to `app/src` and create the file `last_fm_secret.js` with the contents:
+
+-----
+const Secrets = module.exports = { 
+    apiKey: "<get this from last.fm>", 
+    apiSecret: "<get this from last.fm>",
+    username: "<your last.fm account>",
+    password: "<your last.fm password>"
+};
+-----
+
+=== Start
+
+`node app.js`
+
+the `sqlite` database module may not work for all platforms, it can be disabled with
+
+`node app.js --no-db`
+
+the Last.fm integration can be disabled with
+
+`node app.js --no-lastfm`
+
+== Usage
+
+Navigate with any browser to
+
+`http://localhost:8080`
+
+== Hardware
+
+The app can interact with a Raspberry Pi that has mounted a pan-tilt with a laser pointer
+
+- https://shop.pimoroni.com/products/pan-tilt-hat[pan-tilt HAT module]
+- http://www.ebay.co.uk/itm/650nm-Laser-sensor-Module-6mm-5V-5mW-Red-Laser-Dot-Diode-Arduino-Raspberry-Pi/181973250215[laser pointer module]
+
+== Documentation
+
+There is a https://valentingalea.github.io/vinyl-shelf-finder/[micro-website] setup via the `docs` folder
+
+== Contact
+
+Reach me on https://twitter.com/valentin_galea[twitter]
