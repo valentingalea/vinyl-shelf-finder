@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="App and IoT solution for managing vinyl record shelves">
+    <meta name="author" content="Valentin Galea">
+
+    <title>Vinyl Shelf Finder</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
+
+    <link href="style.css" rel="stylesheet">
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
+        <ul class="navbar-nav mr-auto">
+          <li class="nav-item active">
+            <a class="nav-link" href="#">Home<span class="sr-only">(current)</span></a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="jumbotron">
+      <div class="container">
+        <h1 class="display-3">Vinyl Shelf Finder</h1>
+        <p>Find your vinyl records using a RaspberyPi powered laser! With integrated app that leverages your Discogs collection! You can also scrobble your vinyls on Last.fm!</p>
+        <p><a class="btn btn-primary btn-lg" target="_blank" href="https://github.com/valentingalea/vinyl-shelf-finder" role="button">Project page &raquo;</a></p>
+      </div>
+    </div>
+
+    <div class="container">
+
+      <div class="row featurette">
+        <div class="col-md-6">
+          <h2 class="featurette-heading">See it in action - <span class="text-muted">It'll blow your mind!</span></h2>
+          <p class="lead">Demonstration of the system. Import your Discogs collection, input the positions in shelves (the hard part), then connect to the web app and find your record.</p>
+        </div>
+        <div class="col-md-6">
+          <video src="img/demo.webm" width="600" height="600" controls></video>
+        </div>
+      </div>
+
+      <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+          <h2 class="featurette-heading">Mobile app - <span class="text-muted">Connect and find</span></h2>
+          <p class="lead">HTML Node.js powered web app. Feeds off a Discogs collection and allows to trigger the laser finder, and to scrobble records.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+          <img class="featurette-image img-fluid mx-auto" src="img/app.png">
+        </div>
+      </div>
+
+      <div class="row featurette">
+        <div class="col-md-7">
+          <h2 class="featurette-heading">Last.fm - <span class="text-muted">Scrobble your vinyls</span></h2>
+          <p class="lead">The app has Last.fm integration and allows to "play" a record: it will send the selected tracks to Last.fm to build your listening history. Obviously this is a manual step and you must remember to do this when you put the record on the timetable :)</p>
+        </div>
+        <div class="col-md-5">
+          <img class="featurette-image img-fluid mx-auto" src="img/last_fm.png">
+        </div>
+      </div>
+
+      <div class="row featurette">
+        <div class="col-md-7 order-md-2">
+          <h2 class="featurette-heading">Personal database - <span class="text-muted">Save your listening</span></h2>
+          <p class="lead">The "play" feature also saves the tracks to a local Sqlite database that can be retrieved at any time. This allows personal backups and to never lose any data. In the future this can be used to drive custom statistics.</p>
+        </div>
+        <div class="col-md-5 order-md-1">
+          <img class="featurette-image img-fluid mx-auto" src="img/sqlite.png">
+        </div>
+      </div>   
+
+      <div class="row featurette">
+        <div class="col-md-7">
+          <h2 class="featurette-heading">Open Source - <span class="text-muted">Free to use and improve</span></h2>
+          <p class="lead">The app and the Raspbery Pi modules are all open sourced and hosted on Github. Any record collector can recreate the system and improve upon on. <a target="_blank" href="https://github.com/valentingalea/vinyl-shelf-finder">github/vinyl-shelf-finder</a></p>
+        </div>
+        <div class="col-md-5">
+          <img class="featurette-image img-fluid mx-auto" src="img/src.png">
+        </div>
+      </div>
+
+      <div class="row featurette">
+        <div class="col-md-5">
+          <ul class="list-group">
+            <li class="list-group-item active">TO-DO</li>
+            <li class="list-group-item">Ability to connect to any Discogs account</li>
+            <li class="list-group-item">Modify Last.fm integration to web auth</li>
+            <li class="list-group-item">The servo pan-tilt is very innacurate - research stepper motor solution</li>
+            <li class="list-group-item">Research if possible to automate the manual position entry</li>
+            <li class="list-group-item">Write custom statistics like shelves heatmap</li>
+            <li class="list-group-item">Redo the web app into mobile one via tools like Phonegap</li>           
+          </ul>
+        </div>
+        <div class="col-md-7">
+          <h2 class="featurette-heading">Work in progress - <span class="text-muted">Missing features</span></h2>
+          <p class="lead">For now the project is of personal nature only. Lots of things are hardcoded and won't scale. The whole thing also depends on the willingness to enter shelf position in the Discogs collection. If enough outside interest gathers I will look to expand it.</p>
+        </div>        
+      </div>      
+
+      <hr class="featurette-divider">
+
+      <div class="text-center">
+        <h3><a href="https://twitter.com/valentin_galea" target="_blank">Valentin Galea</a></h3>
+      </div>
+
+      <hr class="featurette-divider">
+    </div> <!-- /container -->
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+  </body>
+</html>
