@@ -2,12 +2,7 @@
 
 var last_fm = module.exports = {};
 
-const Secrets = { 
-    apiKey: "c84750248c82a9e2254a6f600091e143", 
-    apiSecret: "b55c17e5a586a92106c24e42d72d2cec",
-    username: "vinyltin",
-    password: "last.fmstew42pigs"
-};
+const Secrets = require('./last_fm_secret.js');
 
 const lib = require('last.fm.api');
 const api = new lib(Object.assign(Secrets, { debug: false }));
