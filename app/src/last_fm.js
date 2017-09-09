@@ -10,7 +10,7 @@ const Secrets = {
 };
 
 const lib = require('last.fm.api');
-const api = new lib(Object.assign(Secrets, { debug: true }));
+const api = new lib(Object.assign(Secrets, { debug: false }));
 
 const cache = require('./cache.js');
 cache.init_last_fm();
