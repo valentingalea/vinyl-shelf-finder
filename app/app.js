@@ -109,7 +109,10 @@ app.get('/play/:id(\\d+)', function (req, res) {
 //
 // Sqlite local database
 //
-const db = require('./src/sqlite.js');
+const db = function() {
+    const disable = process.argv.find(arg => arg === '--no-db');
+    return (disable) ? undefined : require('./src/sqlite.js');
+}();
 
 app.get('/db-create', function (req, res) {
     db.create();
@@ -136,15 +139,17 @@ app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
         return;
     }
 
-    var info = {
-        $release: entry.id,
-        $timestamp: lru.timestamp(),
-        $shelf_id: DG.get_shelf_id(entry),
-        $shelf_pos: DG.get_shelf_pos(entry),
-        $cmd: cmd,
-        $track_data: stringifyObject(to_submit)
-    };
-    db.add(info);
+    if (db) {
+        var info = {
+            $release: entry.id,
+            $timestamp: lru.timestamp(),
+            $shelf_id: DG.get_shelf_id(entry),
+            $shelf_pos: DG.get_shelf_pos(entry),
+            $cmd: cmd,
+            $track_data: stringifyObject(to_submit)
+        };
+        db.add(info);
+    }
 
     last_fm.scrobble(to_submit, res);
 });
