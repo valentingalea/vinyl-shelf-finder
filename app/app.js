@@ -122,7 +122,10 @@ app.get('/db-create', function (req, res) {
 //
 // Last.fm
 //
-const last_fm = require('./src/last_fm');
+const last_fm = function() {
+    const disable = process.argv.find(arg => arg === '--no-lastfm');
+    return (disable) ? undefined : require('./src/last_fm.js');
+}();
 
 app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
     var entry = DG.find_by_id(req.params.id);
@@ -151,7 +154,11 @@ app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
         db.add(info);
     }
 
-    last_fm.scrobble(to_submit, res);
+    if (last_fm) {
+        last_fm.scrobble(to_submit, res);
+    } else {
+        res.send('Last.fm disabled');
+    }
 });
 
 //
