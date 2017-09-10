@@ -10,19 +10,24 @@ def tick():
 	time.sleep(0.010)
 
 class Shelf(object):
-	def __init__(self):
-		self.count = None; # num of records
-		self.pan_start = None; # degress +
-		self.pan_end = None; # degrees -
-		self.tilt_pos = None; # degrees
+	def __init__(self, num, start, end, tilt):
+		self.count = num; # num of records
+		self.pan_start = start; # degress +
+		self.pan_end = end; # degrees -
+		self.tilt_pos = tilt; # degrees
 
 	def map_pos_to_angles(self, pos):
 		if (pos <= 0 or pos > self.count):
 			return 0
+
+	# naive algorithm: just lerp the range of angles
+	# it works well enough
 		pan_range = abs(self.pan_start) + abs(self.pan_end)
 		incr = float(pan_range) / self.count
 		return int(self.pan_start - pos * incr)
 		
+	# a better algoritm: get the angle based on physical
+	# measurements - but somehow behaves very poorly
 		# dist = 700. #mm
 		# record_thick = 10. #mm
 		# error = .5 #mm
@@ -32,32 +37,13 @@ class Shelf(object):
 		# return int(math.degrees(angle))
 
 max_shelves = 5
-shelves = [Shelf() for _ in range(max_shelves)]
-
-shelves[0].count = 41
-shelves[0].pan_start = 24
-shelves[0].pan_end = -29
-shelves[0].tilt_pos = -68
-
-shelves[1].count = 68
-shelves[1].pan_start = 24
-shelves[1].pan_end = -28
-shelves[1].tilt_pos = -40
-
-shelves[2].count = 80
-shelves[2].pan_start = 26
-shelves[2].pan_end = -25
-shelves[2].tilt_pos = 0
-
-shelves[3].count = 88
-shelves[3].pan_start = 25
-shelves[3].pan_end = -26
-shelves[3].tilt_pos = 40
-
-shelves[4].count = 68
-shelves[4].pan_start = 26
-shelves[4].pan_end = -26
-shelves[4].tilt_pos = 65
+shelves = [
+	Shelf(42, 24, -29, -68),
+	Shelf(68, 24, -28, -40),
+	Shelf(80, 26, -25,   0),
+	Shelf(88, 25, -26, +40),
+	Shelf(68, 26, -26, +65)
+]
 
 # sanity checks
 if len(sys.argv) != 3:
