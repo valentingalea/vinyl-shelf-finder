@@ -22,7 +22,9 @@ module.exports = function(req, res) {
             }
         };        
 
-        var main_artist = data.artists[0].name;
+		//BN added regex to replace parenthesis from artist names from Discogs like "Elder (2)"
+		//BN https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses added $ for end of line match only.
+        var main_artist = data.artists[0].name.replace(/ *\([^)]*\) *$/g, "");
         var main_album = data.title;
         var main_tracks = data.tracklist;
 
