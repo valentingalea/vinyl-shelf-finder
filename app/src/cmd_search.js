@@ -11,8 +11,13 @@ module.exports = function(req, templ_file, pub_dir, on_pi) {
     var found = [];
     if (!req.query.q || req.query.q === "") {
     // if not search string, get a random one
-        var index = Math.round(Math.random() * DG.get_count());
-        found = [ DG.raw_col[index] ];
+	// BN modified this so a blank search shows whole collection...
+        //var index = Math.round(Math.random() * DG.get_count());
+        //found = [ DG.raw_col[index] ];
+		for (var i = 0; i < DG.raw_col.length; i++) {
+			var entry = DG.raw_col[i];
+			found.push(entry);
+		}
     } else {
     // special search commands
         if (req.query.q.indexOf('shelf:') > -1 ||
