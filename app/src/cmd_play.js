@@ -31,6 +31,7 @@ module.exports = function(req, res) {
         lru.track_list.length = 0; // https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
         var play_time = Math.floor(Date.now() / 1000);
 
+		//BN main_tracks.length is the size of the tracklist array returned by Discogs API
         for (var i = 0; i < main_tracks.length; i++) {
             var t = main_tracks[i];
             if ((t.position === '') || (t.type_ != 'track')) continue;
@@ -46,7 +47,11 @@ module.exports = function(req, res) {
                 trackNumber: t.position
             };
 
-            play_time += parse_duration(t.duration);
+			//BN if discogs has no track length data, make default length 3 minutes.
+            if (parse_duration(t.duration) == 0) {
+				play_time += 180;
+			} else { play_time += parse_duration(t.duration); }
+			
             lru.track_list.push(track_scrobble);
         }
 
