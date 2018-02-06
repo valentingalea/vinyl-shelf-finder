@@ -12,23 +12,27 @@ module.exports = function(req, res) {
 
         // from https://stackoverflow.com/a/17098372/5760
         var parse_duration = function (str) {
-            var parts = str.match(/^(\d*:)?(\d*)$/);
-            if (parts) {
+			var parts = str.match(/^(\d*:)?(\d*)$/);
+            //BN Check for non-blank strings - if blank, default track time is 180 sec
+			if (parts[0] != '') {
                 var min = parseInt(parts[1], 10) || 0;
                 var sec = parseInt(parts[2], 10) || 0;
-                return min * 60 + sec;
+				return min * 60 + sec;
             } else {
-                return 0;
+                return 180;
             }
         };        
 
-        var main_artist = data.artists[0].name;
+		//BN added regex to replace parenthesis from artist names from Discogs like "Elder (2)"
+		//BN https://stackoverflow.com/questions/4292468/javascript-regex-remove-text-between-parentheses added $ for end of line match only.
+        var main_artist = data.artists[0].name.replace(/ *\([^)]*\) *$/g, "");
         var main_album = data.title;
         var main_tracks = data.tracklist;
 
         lru.track_list.length = 0; // https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
         var play_time = Math.floor(Date.now() / 1000);
 
+		//BN main_tracks.length is the size of the tracklist array returned by Discogs API
         for (var i = 0; i < main_tracks.length; i++) {
             var t = main_tracks[i];
             if ((t.position === '') || (t.type_ != 'track')) continue;
@@ -44,7 +48,8 @@ module.exports = function(req, res) {
                 trackNumber: t.position
             };
 
-            play_time += parse_duration(t.duration);
+			play_time += parse_duration(t.duration);
+			
             lru.track_list.push(track_scrobble);
         }
 
