@@ -12,13 +12,14 @@ module.exports = function(req, res) {
 
         // from https://stackoverflow.com/a/17098372/5760
         var parse_duration = function (str) {
-            var parts = str.match(/^(\d*:)?(\d*)$/);
-            if (parts) {
+			var parts = str.match(/^(\d*:)?(\d*)$/);
+            //BN Check for non-blank strings - if blank, default track time is 180 sec
+			if (parts[0] != '') {
                 var min = parseInt(parts[1], 10) || 0;
                 var sec = parseInt(parts[2], 10) || 0;
-                return min * 60 + sec;
+				return min * 60 + sec;
             } else {
-                return 0;
+                return 180;
             }
         };        
 
@@ -47,10 +48,7 @@ module.exports = function(req, res) {
                 trackNumber: t.position
             };
 
-			//BN if discogs has no track length data, make default length 3 minutes.
-            if (parse_duration(t.duration) == 0) {
-				play_time += 180;
-			} else { play_time += parse_duration(t.duration); }
+			play_time += parse_duration(t.duration);
 			
             lru.track_list.push(track_scrobble);
         }
