@@ -14,11 +14,9 @@ module.exports = function(req, res) {
         var parse_duration = function (str) {
             var parts = str.match(/^(\d*:)?(\d*)$/);
             if (parts) {
-                var min = parseInt(parts[1], 10) || 0;
+                var min = parseInt(parts[1], 10) || 3; // lots of track won't have duration, so provide a reasonable default
                 var sec = parseInt(parts[2], 10) || 0;
                 return min * 60 + sec;
-            } else {
-                return 0;
             }
         };        
 
@@ -27,7 +25,6 @@ module.exports = function(req, res) {
         var main_tracks = data.tracklist;
 
         lru.track_list.length = 0; // https://stackoverflow.com/questions/1232040/how-do-i-empty-an-array-in-javascript
-        var play_time = Math.floor(Date.now() / 1000);
 
         for (var i = 0; i < main_tracks.length; i++) {
             var t = main_tracks[i];
@@ -39,12 +36,14 @@ module.exports = function(req, res) {
                     main_artist :
                     t.artists[0].name),
                 track: t.title,
-                timestamp: play_time,
+                // ultimately this will be the actual timestamp of playing
+                // but for now we just record duration
+                // because we don't know the order the tracks will be played in 
+                timestamp: parse_duration(t.duration),
                 album: main_album,
                 trackNumber: t.position
             };
 
-            play_time += parse_duration(t.duration);
             lru.track_list.push(track_scrobble);
         }
 

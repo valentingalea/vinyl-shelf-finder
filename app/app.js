@@ -135,12 +135,14 @@ app.get('/last.fm/:id(\\d+)/:choice/:side', function (req, res) {
         res.send('invalid request');
         return;
     }
+    lru.adjust_track_times(to_submit);
+
     // debug
     //res.send(pretty(to_submit));
     //return;
 
     var entry = DG.find_by_id(req.params.id);
-    if (!lru.track_list.length || !entry) {
+    if (!entry) {
         res.send('invalid request');
         return;
     }

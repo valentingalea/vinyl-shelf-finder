@@ -16,6 +16,16 @@ lru.timestamp = function() {
     return Math.floor(Date.now() / 1000);
 }
 
+// for a given list, encode the actual track play time based on length and a start time 
+lru.adjust_track_times = function(list) {
+    var play_time = lru.timestamp();
+    for (var i = 0; i < list.length; i++ ) {
+        var track_len = list[i].timestamp;
+        list[i].timestamp = play_time;
+        play_time += track_len;
+    }
+}
+
 lru.filter = function (cmd, side) {
     var tracks_to_submit = undefined;
 
@@ -28,8 +38,8 @@ lru.filter = function (cmd, side) {
         var n = parseInt(cmd, 10) || 0;
         var sublist = lru.side(side);
         n = n % sublist.length;
-        tracks_to_submit = sublist[n];
+        tracks_to_submit = [ sublist[n] ];
     }
 
-    return tracks_to_submit;    
+    return tracks_to_submit;
 }
