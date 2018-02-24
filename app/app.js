@@ -127,17 +127,20 @@ const last_fm = function() {
     return (disable) ? undefined : require('./src/last_fm.js');
 }();
 
-app.get('/last.fm/:id(\\d+)/:type', function (req, res) {
-    var entry = DG.find_by_id(req.params.id);
-
-    if (!lru.track_list.length || !entry) {
+app.get('/last.fm/:id(\\d+)/:choice/:side', function (req, res) {
+    var choice = req.params.choice;
+    var side = req.params.side;
+    var to_submit = lru.filter(choice, side);
+    if (!to_submit) {
         res.send('invalid request');
         return;
     }
+    // debug
+    //res.send(pretty(to_submit));
+    //return;
 
-    var cmd = req.params.type;
-    var to_submit = lru.filter(cmd);
-    if (!to_submit) {
+    var entry = DG.find_by_id(req.params.id);
+    if (!lru.track_list.length || !entry) {
         res.send('invalid request');
         return;
     }

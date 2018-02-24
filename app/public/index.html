@@ -77,6 +77,7 @@
         <div class="form-group">
             <input id="_srchz_b0x" autocomplete="off" class="form-control" type="text" placeholder="Search" aria-label="Search">
         </div>
+      </div>
     </section>
 
     <div class="album text-muted">
@@ -127,7 +128,7 @@
     <script>
       $('#_srchz_b0x').keyup(function(e) {
         var key = e.which || e.keyCode;
-        if(key == 13) {
+        if(key == 13/*Enter*/) {
           $.get("/search?q=" + $(this).val(), function (data) {
             $("#results").html(data);
 
@@ -145,12 +146,20 @@
 
       function setup_track_list() {
         $('.list-group li').click(function(e) {
+          // manage the highlight switch
           $('.list-group').find('li').removeClass('active');
           $(this).addClass('active');
-
+          
+          // encode the index of the track selected into the radio button
           $('#btn_track').val($(this).index());
+          // pass down for the parent list which side this refers to
+          $('#btn_track').data('side', $(this).parent().data('side'));
+          // go and select it to make clearer to the user
           $('#btn_track').trigger('click');
         });
+
+        // some sensible default
+        $('#btn_track').data('side', 'A');
       };
 
       $('#play_dlg').on('show.bs.modal', function (e) {
@@ -159,6 +168,8 @@
         var id = $(e.relatedTarget).data('id');
         $('.modal-body').html("Loading " + id + " ...");
 
+        // we have a list of tracks, the html comes from the server
+        // just wire events for the track list items
         $.get("/play/" + id, function (data) {
             $('.modal-body').html(data);
             setup_track_list();
@@ -166,13 +177,27 @@
       });
 
       $('#play_btn').on('click', function () {
+        // disable it while we do the query
         $(this).prop('disabled', true);
 
-        var id = $('#track-data').data('id');
-        var type = $('#track-data label.active input').val();
-        $('.modal-body').html("Posting " + id + " ...");
+        // retrieve the Discogs release id we place in there
+        var id = $('#track-choice').data('id');
+        // see which side to play, or if it's an individual track
+        // some twisted logic here:
+        // - by default everything is included, the `choice` is '*'
+        // - any sides will be sent as they are in `choice`
+        // - if individual track the `choice` will be the number relative to the side
+        //   and the `side` is just that, in all other cases it's '*'
+        var btn = $('#track-choice label.active input');
+        var choice = btn.val();
+        var side = "*";
+        if (btn.attr('id') == 'btn_track') {
+          side = $('#btn_track').data('side');
+        }
+        var url = `/last.fm/${id}/${choice}/${side}`;
 
-        $.get("/last.fm/" + id + "/" + type, function (data) {
+        $('.modal-body').html("Posting " + id + " ...");
+        $.get(url, function (data) {
             $('.modal-body').html(data);
         });
       });
