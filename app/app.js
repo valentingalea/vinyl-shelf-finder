@@ -153,7 +153,7 @@ app.get('/last.fm/:id(\\d+)/:choice/:side', function (req, res) {
             $timestamp: lru.timestamp(),
             $shelf_id: DG.get_shelf_id(entry),
             $shelf_pos: DG.get_shelf_pos(entry),
-            $cmd: cmd,
+            $cmd: choice,
             $track_data: stringifyObject(to_submit)
         };
         db.add(info);
