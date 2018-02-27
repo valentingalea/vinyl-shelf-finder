@@ -54,3 +54,18 @@ db.add = function(values) {
 
     sqlite.close(handler);
 };
+
+db.select_all = function(callback) {
+    const sqlite = new sqlite3.Database(location, sqlite3.OPEN_READ, handler);
+    if (!sqlite) return;
+
+    sqlite.all("SELECT * FROM history ORDER BY timestamp ASC;", function(err, rows){
+        if (err) {
+            res.send(err);
+            return;
+        }
+        callback(rows);
+    });
+
+    sqlite.close(handler);
+};

@@ -119,6 +119,12 @@ app.get('/db-create', function (req, res) {
     res.send("Creating database...");
 });
 
+app.get('/heatmap', function (req, res) {
+    db.select_all(function(rows){
+        res.send(pretty(rows));
+    });
+});
+
 //
 // Last.fm
 //
