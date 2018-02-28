@@ -121,7 +121,26 @@ app.get('/db-create', function (req, res) {
 
 app.get('/heatmap', function (req, res) {
     db.select_all(function(rows){
-        res.send(pretty(rows));
+        let unique_list = [];
+        for (let i = 0; i < rows.length; i++) {
+            let next = Math.min(i + 1, rows.length - 1);
+            let dup = (next != i) &&
+                (rows[next].release == rows[i].release) &&
+                (rows[next].timestamp - rows[i].timestamp < 180/*sec*/)
+            if (!dup) {
+                unique_list.push(rows[i]);
+            }
+        }
+
+        let play_data = {
+            max: 0,
+            data: []
+        };
+        for (let i = 0; i < unique_list.length; i++) {
+            // TODO
+        }
+
+        res.send(pretty(unique_list));
     });
 });
 
