@@ -122,7 +122,7 @@ app.get('/db-create', function (req, res) {
 app.get('/heatmap', function (req, res) {
     res.sendFile('heatmap.html', { root: get_pub_dir() }); 
 });
-    
+
 app.get('/heatmap-req', function (req, res) {
     db.select_all(function(rows){
         let played_set = [];
@@ -143,7 +143,7 @@ app.get('/heatmap-req', function (req, res) {
         }
 
         let played_heat = {
-            min: 1,
+            min: 0,
             max: 0,
             data: []
         };
@@ -156,8 +156,8 @@ app.get('/heatmap-req', function (req, res) {
             let index = data_find(id, pos);
             if (index < 0) {
                 index = played_heat.data.push({
-                    x: id,
-                    y: pos,
+                    x: pos,
+                    y: id,
                     value: 0
                 }) - 1;
             }
@@ -168,11 +168,15 @@ app.get('/heatmap-req', function (req, res) {
         for (let i = 0; i < played_set.length; i++) {
             data_push(played_set[i].shelf_id, played_set[i].shelf_pos);
         }
-
-        let html_file = fs.readFileSync(get_pub_dir() + 'heatmap.html', 'utf8');
-        res.send(html_file.replace("%DATA%", stringifyObject(played_heat)));
         
-        //res.send(pretty(played_heat));
+        let count_per_shelf = [44, 68, 80, 88, 68];
+        for (let i = 0; i < played_heat.data.length; i++) {
+            let id = played_heat.data[i].y;
+            played_heat.data[i].x *= 1000 / count_per_shelf[id-1];
+            played_heat.data[i].y *= 100;
+        }
+
+        res.send((played_heat));
     });
 });
 
