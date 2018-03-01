@@ -120,27 +120,59 @@ app.get('/db-create', function (req, res) {
 });
 
 app.get('/heatmap', function (req, res) {
+    res.sendFile('heatmap.html', { root: get_pub_dir() }); 
+});
+    
+app.get('/heatmap-req', function (req, res) {
     db.select_all(function(rows){
-        let unique_list = [];
+        let played_set = [];
         for (let i = 0; i < rows.length; i++) {
             let next = Math.min(i + 1, rows.length - 1);
+
             let dup = (next != i) &&
                 (rows[next].release == rows[i].release) &&
                 (rows[next].timestamp - rows[i].timestamp < 180/*sec*/)
-            if (!dup) {
-                unique_list.push(rows[i]);
+
+            let sid = parseInt(rows[i].shelf_id, 10) || 0;
+            let spos = parseInt(rows[i].shelf_pos, 10) || 0;
+            let boxed = (sid < 1) || (spos < 1);
+
+            if (!dup && !boxed) {
+                played_set.push(rows[i]);
             }
         }
 
-        let play_data = {
+        let played_heat = {
+            min: 1,
             max: 0,
             data: []
         };
-        for (let i = 0; i < unique_list.length; i++) {
-            // TODO
+        let data_find = function(id, pos) {
+            return played_heat.data.findIndex((elem) => {
+                return elem.x == id && elem.y == pos;
+            });
+        };
+        let data_push = function(id, pos) {
+            let index = data_find(id, pos);
+            if (index < 0) {
+                index = played_heat.data.push({
+                    x: id,
+                    y: pos,
+                    value: 0
+                }) - 1;
+            }
+            played_heat.data[index].value += 1;
+            played_heat.max = Math.max(played_heat.max, played_heat.data[index].value);
+        };
+
+        for (let i = 0; i < played_set.length; i++) {
+            data_push(played_set[i].shelf_id, played_set[i].shelf_pos);
         }
 
-        res.send(pretty(unique_list));
+        let html_file = fs.readFileSync(get_pub_dir() + 'heatmap.html', 'utf8');
+        res.send(html_file.replace("%DATA%", stringifyObject(played_heat)));
+        
+        //res.send(pretty(played_heat));
     });
 });
 
