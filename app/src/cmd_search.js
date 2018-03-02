@@ -5,21 +5,21 @@ const DG = require('./discogs.js');
 const searcher = require('./search.js');
 const img_download = require('./img_download.js');
 
-module.exports = function(req, templ_file, pub_dir, on_pi) {
-    console.log("Search request: " + req.query.q);
-    
+var mod = module.exports = {};
+
+mod.search = function (query) {
     var found = [];
-    if (!req.query.q || req.query.q === "") {
+    if (!query || query === "") {
     // if not search string, get a random one
         var index = Math.round(Math.random() * DG.get_count());
         found = [ DG.raw_col[index] ];
     } else {
     // special search commands
-        if (req.query.q.indexOf('shelf:') > -1 ||
-            req.query.q.indexOf('s:') > -1 ||
-            req.query.q.indexOf('box:') > -1
+        if (query.indexOf('shelf:') > -1 ||
+            query.indexOf('s:') > -1 ||
+            query.indexOf('box:') > -1
         ) {
-            var tokens = req.query.q.split(':');
+            var tokens = query.split(':');
             var cmd = tokens[0];
             var shelf_id = tokens[1];
 
@@ -47,9 +47,16 @@ module.exports = function(req, templ_file, pub_dir, on_pi) {
             });
         } else {
     // normal string search
-            found = searcher.instance.search(req.query.q);
+            found = searcher.instance.search(query);
         }
     }
+    return found;
+}
+
+mod.search_and_output = function(req, templ_file, pub_dir, on_pi) {
+    console.log("Search request: " + req.query.q);
+    
+    var found = mod.search(req.query.q);
 
     var client_str = "";
     var send_release_to_client = function (input, entry) {

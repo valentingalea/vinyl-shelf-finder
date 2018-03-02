@@ -80,7 +80,8 @@ app.get('/detail/:id(\\d+)', function (req, res) {
 const cmd_search = require('./src/cmd_search.js');
 
 app.get('/search', function (req, res) {
-    res.send(cmd_search(req, templ_file, get_pub_dir(), running_on_pi()));
+    res.send(cmd_search.search_and_output(
+        req, templ_file, get_pub_dir(), running_on_pi()));
 });
 
 //
