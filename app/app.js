@@ -120,8 +120,20 @@ app.get('/db-create', function (req, res) {
     res.send("Creating database...");
 });
 
+//
+// Heatmap visualization
+//
 app.get('/heatmap', function (req, res) {
     res.sendFile('heatmap.html', { root: get_pub_dir() }); 
+});
+
+app.get('/heatmap-list', function (req, res) {
+    let data = cmd_search.search("s:3");
+    let client_str = "";
+    for (let i = 0; i < data.length; i++) {
+        client_str += `<a href="https://www.discogs.com/release/${data[i].id}" target="_blank"><div class="item"></div></a>`;
+    }
+    res.send(client_str);
 });
 
 app.get('/heatmap-req', function (req, res) {
@@ -170,11 +182,14 @@ app.get('/heatmap-req', function (req, res) {
             data_push(played_set[i].shelf_id, played_set[i].shelf_pos);
         }
         
+        // TODO: move these client side
         let count_per_shelf = [44, 68, 80, 88, 68];
         for (let i = 0; i < played_heat.data.length; i++) {
             let id = played_heat.data[i].y;
-            played_heat.data[i].x *= 1000 / count_per_shelf[id-1];
+            played_heat.data[i].x *= 1000 / count_per_shelf[id - 1];
+            played_heat.data[i].y -= 1;
             played_heat.data[i].y *= 100;
+            played_heat.data[i].y += 50;
         }
 
         res.send((played_heat));

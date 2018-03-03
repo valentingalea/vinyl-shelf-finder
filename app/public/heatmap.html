@@ -1,17 +1,46 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <style>
-      body, html, h2 { margin:0; padding:0; height:100%;}
-      body { font-family:sans-serif; }
-      body * { font-weight:200;}
-      #heatmapContainerWrapper { width:100%; height:100%; position:absolute; background:rgba(0,0,0,.1); }
-      #heatmapContainer { width:100%; height:100%;}
+        body, html, h2 { margin:0; padding:0; height:100%;}
+        body { font-family:sans-serif; overflow: hidden; }
+        body * { font-weight:200;}
+        #heatmapContainerWrapper { 
+            width:100%;
+            height:100%;
+            z-index: 0;
+            position: absolute;
+        }
+        #shelfContainer { 
+            width:100%;
+            height:100%;
+            z-index: 2;
+            position: absolute;
+            background: rgba(0, 0, 0, .1);            
+        }
+        #heatmapContainer { 
+            width:100%;
+            height:100%;
+            z-index: 1;
+            position: absolute;
+        }
+        .item { 
+            width: 10px;
+            height: 50px;
+            margin-left: 3px;
+            margin-right: 3px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+            display: block; 
+            float: left; 
+            background-color:lightgray;
+        }
     </style>
-  </head>
-  <body>
+</head>
+<body>
     <div id="heatmapContainerWrapper">
+        <div id="shelfContainer"></div>
         <div id="heatmapContainer"></div>
     </div>
     <script data-src="lib/heatmap.js/2.0.5/build/heatmap.min.js">
@@ -27,14 +56,16 @@
     </script>
     <script src="lib/jquery/3.2.1/jquery.min.js"></script>
     <script>
-        // create a heatmap instance
+        $.get("/heatmap-list", function (data) {
+            $("#shelfContainer").html(data);
+        });
+
         var heatmap = h337.create({
             container: document.getElementById('heatmapContainer')
         //  maxOpacity: .5,
         //  radius: 10,
         //  blur: .75
         });
-
         $.get("/heatmap-req", function (data) {
             heatmap.setData(data);
         });
