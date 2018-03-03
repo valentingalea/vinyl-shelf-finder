@@ -129,10 +129,6 @@ app.get('/heatmap', function (req, res) {
     res.sendFile('heatmap.html', { root: get_pub_dir() }); 
 });
 
-app.get('/heatmap-list', function (req, res) {
-    cmd_heatmap.list(cmd_search, res);
-});
-
 app.get('/heatmap-draw', function (req, res) {
     cmd_heatmap.draw(db, res);
 });

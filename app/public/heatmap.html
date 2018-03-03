@@ -15,25 +15,21 @@
         #shelfContainer { 
             width:100%;
             height:100%;
-            z-index: 2;
+            z-index: 1;
             position: absolute;
-            background: rgba(0, 0, 0, .1);            
         }
         #heatmapContainer { 
             width:100%;
             height:100%;
-            z-index: 1;
+            z-index: 2;
             position: absolute;
+            background: rgba(0, 0, 0, .1);
         }
         .item { 
             width: 10px;
-            height: 50px;
-            margin-left: 3px;
-            margin-right: 3px;
-            margin-top: 5px;
-            margin-bottom: 5px;
+            height: 70px;
             display: block; 
-            float: left; 
+            position: absolute;
             background-color:lightgray;
         }
     </style>
@@ -56,18 +52,43 @@
     </script>
     <script src="lib/jquery/3.2.1/jquery.min.js"></script>
     <script>
-        $.get("/heatmap-list", function (data) {
-            $("#shelfContainer").html(data);
-        });
-
         var heatmap = h337.create({
             container: document.getElementById('heatmapContainer')
-        //  maxOpacity: .5,
-        //  radius: 10,
-        //  blur: .75
+            // , maxOpacity: .5
+            // , radius: 70
+            // , blur: .75
         });
-        $.get("/heatmap-draw", function (data) {
-            heatmap.setData(data);
+
+        const shelf_width = 1200; // px
+        const shelf_height = 70; // px
+        const padding = 10;
+
+        function draw_item(item, shelf_count) {
+            return '<a href="https://www.discogs.com/release/' + item.release + '" target="_blank">'
+            +    '<div class="item" style="'
+            +       'left:' + (item.x * (shelf_width / shelf_count[item.y - 1]))
+            +       'px;top:' + ((item.y - 1) * (shelf_height + padding)) + 'px;"></div>'
+            + '</a>';
+        }
+
+        $.get("/heatmap-draw", function (played_heat) {
+            var html_items = "";
+            var cnt = played_heat.shelf_count;
+            
+            // draw the record placeholders
+            for (var i = 0; i < played_heat.data.length; i++) {
+                html_items += draw_item(played_heat.data[i], cnt);
+            }
+            $("#shelfContainer").html(html_items);
+
+            // adjust the heatmap by spacing out the sample points
+            // to match the placeholders
+            for (var i = 0; i < played_heat.data.length; i++) {
+                let id = played_heat.data[i].y - 1; // shelf num 
+                played_heat.data[i].x *= shelf_width / cnt[id];
+                played_heat.data[i].y = id * (shelf_height + padding) + shelf_height / 2;
+            }
+            heatmap.setData(played_heat);
         });
     </script>
 </body>

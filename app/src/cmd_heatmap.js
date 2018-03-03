@@ -1,16 +1,56 @@
 'use strict';
 
+const DG = require('./discogs.js');
+
 var heat = module.exports = {};
 
 heat.draw = function(db, res) {
+    // the whole db of records in heatmap.js format
+    // which means that `x` is the record position in the shelf
+    // and `y` is shelf id (or number)
+    let played_heat = {
+        min: 0,
+        max: 0,
+        data: [],
+        shelf_count: []
+    };
+
+    // calculate the number of records on a shelf
+    let flt = function(arr, id) {
+        return arr.filter(function(entry) {
+            return DG.get_shelf_id(entry) == id;
+        });
+    };
+    for (let i = 1; i <= 5; i++ ) {
+        played_heat.shelf_count.push(flt(DG.raw_col, i).length);
+    }
+
+    // insert all records owned and assume 0 play times
+    for (let i = 0; i < DG.raw_col.length; i++) {
+        let entry = DG.raw_col[i];
+        var s_id = DG.get_shelf_id(entry);
+        if (s_id === 'box') continue;
+        var s_pos = DG.get_shelf_pos(entry);
+
+        played_heat.data.push({
+            x: s_pos,
+            y: s_id,
+            value: 0,
+            release: entry.id
+        });
+    }
+
+    // calculate the actual heatmap info: the amount of times
+    // a particular record has been played
     db.select_all(function(rows){
         let played_set = [];
         for (let i = 0; i < rows.length; i++) {
             let next = Math.min(i + 1, rows.length - 1);
 
-            let dup = (next != i) &&
-                (rows[next].release == rows[i].release) &&
-                (rows[next].timestamp - rows[i].timestamp < 180/*sec*/)
+            let dup = (next != i)
+                && (rows[next].release == rows[i].release)
+                && (rows[next].timestamp - rows[i].timestamp < 180) // 3 min apart
+            ;
 
             let sid = parseInt(rows[i].shelf_id, 10) || 0;
             let spos = parseInt(rows[i].shelf_pos, 10) || 0;
@@ -21,52 +61,25 @@ heat.draw = function(db, res) {
             }
         }
 
-        let played_heat = {
-            min: 0,
-            max: 0,
-            data: []
-        };
-        let data_find = function(id, pos) {
+        let data_find = function(_x, _y) {
             return played_heat.data.findIndex((elem) => {
-                return elem.x == id && elem.y == pos;
+                return elem.x == _x && elem.y == _y;
             });
         };
-        let data_push = function(id, pos) {
-            let index = data_find(id, pos);
-            if (index < 0) {
-                index = played_heat.data.push({
-                    x: pos,
-                    y: id,
-                    value: 0
-                }) - 1;
-            }
+        let data_push = function(_x, _y, rel) {
+            let index = data_find(_x, _y);
+            if (index < 0) return;
             played_heat.data[index].value += 1;
             played_heat.max = Math.max(played_heat.max, played_heat.data[index].value);
         };
-
         for (let i = 0; i < played_set.length; i++) {
-            data_push(played_set[i].shelf_id, played_set[i].shelf_pos);
+            data_push(
+                played_set[i].shelf_pos,
+                played_set[i].shelf_id,
+                played_set[i].release
+            );
         }
         
-        // TODO: move these client side
-        let count_per_shelf = [44, 68, 80, 88, 68];
-        for (let i = 0; i < played_heat.data.length; i++) {
-            let id = played_heat.data[i].y;
-            played_heat.data[i].x *= 1000 / count_per_shelf[id - 1];
-            played_heat.data[i].y -= 1;
-            played_heat.data[i].y *= 100;
-            played_heat.data[i].y += 50;
-        }
-
         res.send(played_heat);
     });
-};
-
-heat.list = function(searcher, res) {
-    let data = searcher.search("s:3");
-    let client_str = "";
-    for (let i = 0; i < data.length; i++) {
-        client_str += `<a href="https://www.discogs.com/release/${data[i].id}" target="_blank"><div class="item"></div></a>`;
-    }
-    res.send(client_str);    
 };
