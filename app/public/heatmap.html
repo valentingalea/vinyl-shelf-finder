@@ -3,42 +3,48 @@
 <head>
     <meta charset="utf-8">
     <style>
-        body, html, h2 { margin:0; padding:0; height:100%;}
-        body { font-family:sans-serif; overflow: hidden; }
-        body * { font-weight:200;}
-        #heatmapContainerWrapper { 
-            width:100%;
-            height:100%;
+        #container { 
+            width: 100%;
+            height: 100%;
             z-index: 0;
             position: absolute;
-            margin: 10px;
         }
-        #shelfContainer { 
-            width:100%;
-            height:100%;
+        #records { 
+            width: 100%;
+            height: 100%;
             z-index: 1;
             position: absolute;
         }
-        #heatmapContainer { 
-            width:100%;
-            height:100%;
+        #heatmap { 
+            width: 100%;
+            height: 100%;
             z-index: 2;
             position: absolute;
             background: rgba(0, 0, 0, .1);
         }
-        .item { 
+        #links { 
+            width: 100%;
+            height: 100%;
+            z-index: 3;
+            position: absolute;
+            top: 0;
+        }
+        .shelf-item { 
             width: 10px;
             height: 70px;
             display: block; 
             position: absolute;
+        }
+        .record {
             background-color: darkgray;
         }
     </style>
 </head>
 <body>
-    <div id="heatmapContainerWrapper">
-        <div id="shelfContainer"></div>
-        <div id="heatmapContainer"></div>
+    <div id="container">
+        <div id="records"></div>
+        <div id="heatmap"></div>
+        <div id="links"></div>
     </div>
     <script data-src="lib/heatmap.js/2.0.5/build/heatmap.min.js">
         /*
@@ -54,7 +60,7 @@
     <script src="lib/jquery/3.2.1/jquery.min.js"></script>
     <script>
         var heatmap = h337.create({
-            container: document.getElementById('heatmapContainer')
+            container: document.getElementById('heatmap')
             // , maxOpacity: .5
             // , radius: 70
             // , blur: .75
@@ -79,12 +85,17 @@
             return (item.y - 1) * (shelf_height + padding_y) + padding_y;
         };
 
-        function draw_item(item, shelf_count) {
-            return '<a href="https://www.discogs.com/release/' + item.release + '" target="_blank">'
-            +    '<div class="item" style="'
+        function draw_record(item, shelf_count) {
+            return '<div class="shelf-item record" style="'
             +       'left:' + pos_x(item, shelf_count)
             +       'px;top:' + pos_y(item, shelf_count) + 'px;"></div>'
-            + '</a>';
+        }
+
+        function draw_link(item, shelf_count) {
+            return '<a href="https://www.discogs.com/release/' + item.release + '" target="_blank"'
+            +    ' class="shelf-item" style="'
+            +       'left:' + pos_x(item, shelf_count)
+            +       'px;top:' + pos_y(item, shelf_count) + 'px;"></a>'
         }
 
         $.get("/heatmap-draw", function (played_heat) {
@@ -92,14 +103,21 @@
             var cnt = played_heat.shelf_count;
 
             // resize container area based on shelf counts
-            $("#heatmapContainerWrapper").width(shelf_width + 60); // TODO: because of gaps
-            $("#heatmapContainerWrapper").height((shelf_height + padding_y) * cnt.length + padding_y);
+            $("#container").width(shelf_width + 60); // TODO: because of gaps
+            $("#container").height((shelf_height + padding_y) * cnt.length + padding_y);
 
             // draw the record placeholders
             for (var i = 0; i < played_heat.data.length; i++) {
-                html_items += draw_item(played_heat.data[i], cnt);
+                html_items += draw_record(played_heat.data[i], cnt);
             }
-            $("#shelfContainer").html(html_items);
+            $("#records").html(html_items);
+
+            // draw the record links to Discogs
+            html_items = "";
+            for (var i = 0; i < played_heat.data.length; i++) {
+                html_items += draw_link(played_heat.data[i], cnt);
+            }
+            $("#links").html(html_items);
 
             // adjust the heatmap by spacing out the sample points
             // to match the placeholders
