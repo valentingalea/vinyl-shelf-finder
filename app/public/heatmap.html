@@ -11,6 +11,7 @@
             height:100%;
             z-index: 0;
             position: absolute;
+            margin: 10px;
         }
         #shelfContainer { 
             width:100%;
@@ -30,7 +31,7 @@
             height: 70px;
             display: block; 
             position: absolute;
-            background-color:lightgray;
+            background-color: darkgray;
         }
     </style>
 </head>
@@ -59,22 +60,41 @@
             // , blur: .75
         });
 
-        const shelf_width = 1200; // px
-        const shelf_height = 70; // px
-        const padding = 10;
+        //TODO: this should auto calc as the max of the shelf counts
+        // provided by the server, but I done goofed and left 
+        // gaps when I numbered/entered the records
+        // for ex (27-30) and (77-79) on shelf id 4
+        const max_items = 85 + 3 + 2;
+
+        const padding_x = 5; // left and right sides combined
+        const padding_y = 10;
+        const item_width = 10 + padding_x; //TODO: get via CSS
+        const shelf_width = max_items * item_width;
+        const shelf_height = 70; //TODO: get via CSS
+
+        function pos_x(item, shelf_count) {
+            return item.x * (shelf_width / shelf_count[item.y - 1]) - item_width / 2;
+        };
+        function pos_y(item, shelf_count) {
+            return (item.y - 1) * (shelf_height + padding_y) + padding_y;
+        };
 
         function draw_item(item, shelf_count) {
             return '<a href="https://www.discogs.com/release/' + item.release + '" target="_blank">'
             +    '<div class="item" style="'
-            +       'left:' + (item.x * (shelf_width / shelf_count[item.y - 1]))
-            +       'px;top:' + ((item.y - 1) * (shelf_height + padding)) + 'px;"></div>'
+            +       'left:' + pos_x(item, shelf_count)
+            +       'px;top:' + pos_y(item, shelf_count) + 'px;"></div>'
             + '</a>';
         }
 
         $.get("/heatmap-draw", function (played_heat) {
             var html_items = "";
             var cnt = played_heat.shelf_count;
-            
+
+            // resize container area based on shelf counts
+            $("#heatmapContainerWrapper").width(shelf_width + 60); // TODO: because of gaps
+            $("#heatmapContainerWrapper").height((shelf_height + padding_y) * cnt.length + padding_y);
+
             // draw the record placeholders
             for (var i = 0; i < played_heat.data.length; i++) {
                 html_items += draw_item(played_heat.data[i], cnt);
@@ -84,9 +104,9 @@
             // adjust the heatmap by spacing out the sample points
             // to match the placeholders
             for (var i = 0; i < played_heat.data.length; i++) {
-                let id = played_heat.data[i].y - 1; // shelf num 
-                played_heat.data[i].x *= shelf_width / cnt[id];
-                played_heat.data[i].y = id * (shelf_height + padding) + shelf_height / 2;
+                let item = played_heat.data[i];
+                played_heat.data[i].x = pos_x(item, cnt);
+                played_heat.data[i].y = pos_y(item, cnt) + shelf_height / 2;
             }
             heatmap.setData(played_heat);
         });
