@@ -49,7 +49,7 @@ heat.draw = function(db, res) {
 
             let dup = (next != i)
                 && (rows[next].release == rows[i].release)
-                && (rows[next].timestamp - rows[i].timestamp < 180) // 3 min apart
+                //&& (rows[next].timestamp - rows[i].timestamp < 180) // 3 min apart
             ;
 
             let sid = parseInt(rows[i].shelf_id, 10) || 0;
