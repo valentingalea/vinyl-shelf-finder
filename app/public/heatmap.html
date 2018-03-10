@@ -61,9 +61,9 @@
     <script>
         var heatmap = h337.create({
             container: document.getElementById('heatmap')
-             , maxOpacity: .5
-             , radius: 80
-             , blur: .5
+             //, maxOpacity: .5
+             //, radius: 80
+             //, blur: .5
         });
 
         //TODO: this should auto calc as the max of the shelf counts
@@ -89,7 +89,7 @@
         function draw_record(item, shelf_count) {
             return '<div class="shelf-item record" style="'
             +       'left:' + (pos_x(item, shelf_count) - item_width / 2)
-            +       'px;top:' + pos_y(item, shelf_count) + 'px;"></div>'
+            +       'px;top:' + pos_y(item, shelf_count) + 'px;">' + item.value + '</div>'
         }
 
         function draw_link(item, shelf_count) {
