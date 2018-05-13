@@ -1,6 +1,8 @@
 = Vinyl Shelf Finder
 
 == About
+image::https://valentingalea.github.io/vinyl-shelf-finder/img/app.png[Screenshot, 256, 256]
+
 *Vinyltin* - is a app that manages a Discogs user records collection and helps locate them in shelving cabinets - provided a certain ordering is maintained.
 
 == Features
@@ -29,9 +31,22 @@ Install all the dependencies
 
 === Setup
 
-Open `app/src/config.js` and edit appropriately with your Discogs.com info.
+==== Discogs
 
-Optionally - navigate to `app/src` and create the file `last_fm_secret.js` with the contents:
+Navigate to `app/src` and create the file `discogs_secret.js` with the contents:
+
+-----
+const Secrets = module.exports = {
+    consumerKey: "<get this from Discogs.com>",
+    consumerSecret: "<get this from Discogs.com>"
+};
+-----
+
+Open `app/src/config.js` and edit appropriately with your Discogs.com info/preferences.
+
+==== Last.fm (optional)
+
+Navigate to `app/src` and create the file `last_fm_secret.js` with the contents:
 
 -----
 const Secrets = module.exports = { 
