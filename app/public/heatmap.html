@@ -31,7 +31,7 @@
         }
         .shelf-item { 
             width: 10px;
-            height: 70px;
+            height: 100px;
             display: block; 
             position: absolute;
         }
@@ -61,9 +61,9 @@
     <script>
         var heatmap = h337.create({
             container: document.getElementById('heatmap')
-            // , maxOpacity: .5
-            // , radius: 70
-            // , blur: .75
+             //, maxOpacity: .5
+             //, radius: 80
+             //, blur: .5
         });
 
         //TODO: this should auto calc as the max of the shelf counts
@@ -76,25 +76,26 @@
         const padding_y = 10;
         const item_width = 10 + padding_x; //TODO: get via CSS
         const shelf_width = max_items * item_width;
-        const shelf_height = 70; //TODO: get via CSS
+        const shelf_height = 100; //TODO: get via CSS
+        const offset = 100;
 
         function pos_x(item, shelf_count) {
-            return item.x * (shelf_width / shelf_count[item.y - 1]) - item_width / 2;
+            return item.x * (shelf_width / shelf_count[item.y - 1]) + offset;
         };
         function pos_y(item, shelf_count) {
-            return (item.y - 1) * (shelf_height + padding_y) + padding_y;
+            return (item.y - 1) * (shelf_height + padding_y) + padding_y + offset;
         };
 
         function draw_record(item, shelf_count) {
             return '<div class="shelf-item record" style="'
-            +       'left:' + pos_x(item, shelf_count)
-            +       'px;top:' + pos_y(item, shelf_count) + 'px;"></div>'
+            +       'left:' + (pos_x(item, shelf_count) - item_width / 2)
+            +       'px;top:' + pos_y(item, shelf_count) + 'px;">' + item.value + '</div>'
         }
 
         function draw_link(item, shelf_count) {
             return '<a href="https://www.discogs.com/release/' + item.release + '" target="_blank"'
             +    ' class="shelf-item" style="'
-            +       'left:' + pos_x(item, shelf_count)
+            +       'left:' + (pos_x(item, shelf_count) - item_width / 2)
             +       'px;top:' + pos_y(item, shelf_count) + 'px;"></a>'
         }
 
@@ -103,8 +104,8 @@
             var cnt = played_heat.shelf_count;
 
             // resize container area based on shelf counts
-            $("#container").width(shelf_width + 60); // TODO: because of gaps
-            $("#container").height((shelf_height + padding_y) * cnt.length + padding_y);
+            //$("#container").width(shelf_width + 60); // TODO: because of gaps
+            //$("#container").height((shelf_height + padding_y) * cnt.length + padding_y);
 
             // draw the record placeholders
             for (var i = 0; i < played_heat.data.length; i++) {
