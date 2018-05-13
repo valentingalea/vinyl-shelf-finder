@@ -2,12 +2,13 @@
 
 var DG = module.exports = {};
 
+const Secrets = require('./discogs_secret.js');
 const Config = require('./config.js');
 const cache = require('./cache.js');
 
 const api = require('disconnect').Client;
-const api_db = new api(Config.Discogs.UserAgent).database();
-const api_col = new api(Config.Discogs.UserAgent).user().collection();
+const api_db = new api(Config.Discogs.UserAgent, Secrets).database();
+const api_col = new api(Config.Discogs.UserAgent, Secrets).user().collection();
 const api_get_folder = api_col.getFolder(Config.Discogs.User, Config.Discogs.CollectionFolder);
 
 DG.api_db = api_db;
