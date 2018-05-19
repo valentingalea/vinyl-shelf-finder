@@ -6,14 +6,16 @@ const Secrets = require('./discogs_secret.js');
 const Config = require('./config.js');
 const cache = require('./cache.js');
 
-const api = require('disconnect').Client;
-const api_db = new api(Config.Discogs.UserAgent, Secrets).database();
-const api_col = new api(Config.Discogs.UserAgent, Secrets).user().collection();
+const client = require('disconnect').Client;
+const api = new client(Config.Discogs.UserAgent, Secrets);
+const api_db = api.database();
+const api_col = api.user().collection();
 const api_get_folder = api_col.getFolder(Config.Discogs.User, Config.Discogs.CollectionFolder);
 
 DG.api_db = api_db;
 DG.api_col = api_col;
 DG.raw_col = [];
+DG.market = api.marketplace();
 
 const page_items = 100; // max API limit is 100
 var page_count = 0;
