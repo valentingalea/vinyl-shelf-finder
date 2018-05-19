@@ -74,6 +74,11 @@ app.get('/detail/:id(\\d+)', function (req, res) {
     });
 });
 
+app.get('/price', function(req, res) {
+    const cmd_market = require('./src/cmd_market.js');
+    cmd_market.price_of_box('box:4', res);
+});
+
 //
 // Search
 //
