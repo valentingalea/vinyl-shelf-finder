@@ -31,31 +31,7 @@ Install all the dependencies
 
 === Setup
 
-==== Discogs
-
-Navigate to `app/src` and create the file `discogs_secret.js` with the contents:
-
------
-const Secrets = module.exports = {
-    consumerKey: "<get this from Discogs.com>",
-    consumerSecret: "<get this from Discogs.com>"
-};
------
-
-Open `app/src/config.js` and edit appropriately with your Discogs.com info/preferences.
-
-==== Last.fm (optional)
-
-Navigate to `app/src` and create the file `last_fm_secret.js` with the contents:
-
------
-const Secrets = module.exports = { 
-    apiKey: "<get this from last.fm>", 
-    apiSecret: "<get this from last.fm>",
-    username: "<your last.fm account>",
-    password: "<your last.fm password>"
-};
------
+Navigate to `app/src` and edit the files `discogs_secret.js` (and optionally `last_fm_secret.js`) with your personal account details.
 
 === Start
 
