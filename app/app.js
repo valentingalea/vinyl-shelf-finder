@@ -170,8 +170,10 @@ app.get('/last.fm/:id(\\d+)/:choice/:side', function (req, res) {
         var info = {
             $release: entry.id,
             $timestamp: lru.timestamp(),
-            $shelf_id: DG.get_shelf_id(entry),
-            $shelf_pos: DG.get_shelf_pos(entry),
+        // disable as I moved them around and bought new shelves
+            $shelf_id: -1, //DG.get_shelf_id(entry),
+            $shelf_pos: -1, //DG.get_shelf_pos(entry),
+        ////
             $cmd: choice,
             $track_data: stringifyObject(to_submit)
         };
